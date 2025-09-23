@@ -1,19 +1,32 @@
-import { useState } from "react";
-import CreatePost from "../components/CreatePost";
-import PostList from "../components/PostList";
+import React from "react";
+import Navbar from "../components/Navbar";
 
-const Home = ({ user }) => {
-  const [posts, setPosts] = useState([]);
+const posts = [
+  { user: "John", content: "Just joined Connectify! 🚀" },
+  { user: "Jane", content: "Excited to connect with everyone!" },
+  { user: "Alex", content: "Loving this app ❤️" },
+];
 
-  const handleNewPost = (newPost) => {
-    setPosts([newPost, ...posts]);
-  };
-
+const Home = () => {
   return (
-    <div className="home-container">
-      <div className="main-content">
-        <CreatePost user={user} onPostCreate={handleNewPost} />
-        <PostList posts={posts} user={user} />
+    <div style={{ paddingBottom: "60px" }}> {/* Extra padding so content isn’t too close to bottom */}
+      <Navbar />
+      <div style={{ padding: "10px" }}>
+        {posts.map((post, index) => (
+          <div
+            key={index}
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "10px",
+              padding: "10px",
+              marginBottom: "10px",
+              backgroundColor: "#fff",
+            }}
+          >
+            <strong>{post.user}</strong>
+            <p>{post.content}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import "./Login.css"; // optional styles
+import Navbar from "../components/Navbar";
 
 const Login = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);

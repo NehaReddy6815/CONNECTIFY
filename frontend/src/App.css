@@ -1,40 +1,12 @@
-/* Connectify Component Styles */
-
-.gradient-primary {
-  background: var(--gradient-primary);
-}
-
-.gradient-secondary {
-  background: var(--gradient-secondary);
-}
-
-.gradient-accent {
-  background: var(--gradient-accent);
-}
-
-.gradient-glass {
-  background: var(--gradient-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.glass-card {
-  background: var(--gradient-glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.shadow-glow {
-  box-shadow: var(--shadow-glow);
-}
-
-.shadow-soft {
-  box-shadow: var(--shadow-soft);
-}
-
-.transition-smooth {
-  transition: var(--transition-smooth);
+/* Center app on screen like a mobile device */
+.mobile-container {
+  width: 375px;       /* typical mobile width */
+  height: 667px;      /* typical mobile height */
+  margin: 0 auto;     /* center horizontally */
+  border: 1px solid #ccc; /* optional phone border */
+  border-radius: 20px; /* rounded edges like a phone */
+  overflow: hidden;    /* hide overflow */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background-color: #f9f9f9;
+  position: relative;
 }
