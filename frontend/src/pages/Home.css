@@ -1,0 +1,19 @@
+.home-container {
+  padding-top: 50px; /* space for navbar */
+  padding-bottom: 60px; /* space for bottom menu */
+  background-color: #f2f2f2;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.posts-feed {
+  padding: 10px;
+}
+
+.post-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+}

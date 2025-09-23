@@ -1,5 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import BottomMenu from "../components/BottomMenu";
+import "./Home.css";
 
 const posts = [
   { user: "John", content: "Just joined Connectify! 🚀" },
@@ -9,25 +11,19 @@ const posts = [
 
 const Home = () => {
   return (
-    <div style={{ paddingBottom: "60px" }}> {/* Extra padding so content isn’t too close to bottom */}
+    <div className="home-container">
       <Navbar />
-      <div style={{ padding: "10px" }}>
+
+      <div className="posts-feed">
         {posts.map((post, index) => (
-          <div
-            key={index}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "10px",
-              padding: "10px",
-              marginBottom: "10px",
-              backgroundColor: "#fff",
-            }}
-          >
+          <div key={index} className="post-card">
             <strong>{post.user}</strong>
             <p>{post.content}</p>
           </div>
         ))}
       </div>
+
+      <BottomMenu />
     </div>
   );
 };

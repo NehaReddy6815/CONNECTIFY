@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
-import "./Login.css"; // optional styles
-import Navbar from "../components/Navbar";
+import "./Login.css"; // import CSS for styling
 
 const Login = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -36,27 +35,21 @@ const Login = ({ onLogin }) => {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), // ✅ fixed
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-
-        if (onLogin) {
-          onLogin(data.user);
-        }
-
+        if (onLogin) onLogin(data.user);
         navigate("/home");
       } else {
         setError(data.message || "Authentication failed");
       }
-    } catch (error) {
-      console.error("Auth error:", error);
+    } catch (err) {
+      console.error("Auth error:", err);
       setError("Connection error. Make sure backend is running on port 5000");
     }
 
@@ -84,43 +77,37 @@ const Login = ({ onLogin }) => {
 
           <form onSubmit={handleSubmit} className="auth-form">
             {!isLogin && (
-              <div className="input-group">
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="auth-input"
-                />
-              </div>
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="auth-input"
+              />
             )}
 
-            <div className="input-group">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="auth-input"
-              />
-            </div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              className="auth-input"
+            />
 
-            <div className="input-group">
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                minLength="6"
-                className="auth-input"
-              />
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              minLength="6"
+              className="auth-input"
+            />
 
             <button
               type="submit"
@@ -135,21 +122,15 @@ const Login = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
-
           <button
             type="button"
             onClick={switchMode}
             className="auth-button secondary"
           >
-            {isLogin ? "Create New Account" : "Already have an account? Log In"}
+            {isLogin
+              ? "Don't have an account? Sign Up"
+              : "Already have an account? Log In"}
           </button>
-        </div>
-
-        <div className="login-footer">
-          <p>&copy; 2024 Connectify. Connect, Share, Engage.</p>
         </div>
       </div>
     </div>
