@@ -1,17 +1,17 @@
 const express = require('express');
-const Post = require('../models/post');
+const router = express.Router();
+const Post = require('../models/Post');
+const User = require('../models/User');
 const auth = require('../middleware/authMiddleware');
 
-const router = express.Router();
-
-// Get all posts
+// Get all posts (for feed)
 router.get('/', async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate('author', 'name profilePicture')
-      .populate('comments.author', 'name profilePicture')
+      .populate('user', 'name email profilePicture')
+      .populate('comments.user', 'name')
       .sort({ createdAt: -1 });
-
+    
     res.json(posts);
   } catch (error) {
     console.error(error);
@@ -19,23 +19,41 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Create a post
+// Get current user's posts
+router.get('/my-posts', auth, async (req, res) => {
+  try {
+    const posts = await Post.find({ user: req.user.userId })
+      .populate('user', 'name email profilePicture')
+      .sort({ createdAt: -1 });
+    
+    res.json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Create a new post
 router.post('/', auth, async (req, res) => {
   try {
     const { content, image } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ message: 'Post content is required' });
+    }
 
-    const post = new Post({
-      content,
-      image: image || '',
-      author: req.user.userId
+    const newPost = new Post({
+      user: req.user.userId,
+      content: content.trim(),
+      image: image || null
     });
 
-    await post.save();
+    await newPost.save();
     
-    // Populate author info
-    await post.populate('author', 'name profilePicture');
-
-    res.status(201).json(post);
+    const populatedPost = await Post.findById(newPost._id)
+      .populate('user', 'name email profilePicture');
+    
+    res.status(201).json(populatedPost);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -51,68 +69,76 @@ router.post('/:id/like', auth, async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Check if user already liked the post
-    const likeIndex = post.likes.findIndex(
-      like => like.user.toString() === req.user.userId
-    );
-
+    const userId = req.user.userId;
+    const likeIndex = post.likes.indexOf(userId);
+    
     if (likeIndex > -1) {
-      // Unlike the post
+      // Unlike
       post.likes.splice(likeIndex, 1);
     } else {
-      // Like the post
-      post.likes.push({ user: req.user.userId });
+      // Like
+      post.likes.push(userId);
     }
-
+    
     await post.save();
-    res.json({ likes: post.likes.length });
+    
+    const populatedPost = await Post.findById(post._id)
+      .populate('user', 'name email profilePicture')
+      .populate('comments.user', 'name');
+    
+    res.json(populatedPost);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Add a comment
-router.post('/:id/comments', auth, async (req, res) => {
+// Add comment to post
+router.post('/:id/comment', auth, async (req, res) => {
   try {
     const { content } = req.body;
-    const post = await Post.findById(req.params.id);
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ message: 'Comment content is required' });
+    }
 
+    const post = await Post.findById(req.params.id);
+    
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
     const newComment = {
-      content,
-      author: req.user.userId
+      user: req.user.userId,
+      content: content.trim()
     };
 
     post.comments.push(newComment);
     await post.save();
-
-    // Populate the new comment
-    await post.populate('comments.author', 'name profilePicture');
     
-    const addedComment = post.comments[post.comments.length - 1];
-    res.status(201).json(addedComment);
+    const populatedPost = await Post.findById(post._id)
+      .populate('user', 'name email profilePicture')
+      .populate('comments.user', 'name');
+    
+    res.json(populatedPost);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete a post
+// Delete a post (only by post owner)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-
+    
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Check if user owns the post
-    if (post.author.toString() !== req.user.userId) {
-      return res.status(403).json({ message: 'Not authorized' });
+    // Check if user is the owner of the post
+    if (post.user.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' });
     }
 
     await Post.findByIdAndDelete(req.params.id);
