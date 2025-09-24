@@ -2,66 +2,58 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const express = require("express");
-const app = express();
-app.use(express.json());
+const cors = require("cors");
 const mongoose = require("mongoose");
 
+const app = express();
 
-app.use(express.static("public"));
-const cors = require("cors");
-app.use(cors());
-
-
-
-
-
+// Middleware
 app.use(express.json());
+app.use(express.static("public"));
 
+// Enable CORS for frontend
+app.use(cors({
+  origin: "http://localhost:5173", // frontend dev server
+  credentials: true
+}));
+
+
+// Debug Mongo URI
 console.log("MONGO_URI:", process.env.MONGO_URI);
 
-//route to see all posts
+// Routes
 const postRoutes = require("./routes/postRoutes");
 app.use("/api/posts", postRoutes);
 
-
-
-//auth route
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
-
-//user route
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-//comment route
 const commentRoutes = require("./routes/commentRoutes");
 app.use("/api/comments", commentRoutes);
 
-
-//notifications route
 const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/notifications", notificationRoutes);
 
-//message route
 const messageRoutes = require("./routes/messageRoutes");
 app.use("/api/messages", messageRoutes);
 
-
+// Error handler (must be after routes)
 const errorMiddleware = require("./middleware/errorMiddleware");
-app.use(errorMiddleware); // must be after routes
+app.use(errorMiddleware);
 
-
-
-const PORT = process.env.PORT || 5000;
-
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected successfully"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
+// Test route
 app.get("/", (req, res) => {
   res.send("Connectify backend is running!");
 });
 
-
-app.listen(5000, () => console.log(`Server running on port 5000`));
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

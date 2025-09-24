@@ -28,7 +28,7 @@ router.post("/register", async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { id: newUser._id },
-      process.env.JWT_KEY || "secret123",
+      process.env.JWT_KEY || "I3AXLXwue87xy52iTDG7fQCRRwPS0Ryd",
       { expiresIn: "7d" }
     );
 
@@ -46,5 +46,44 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+// Login route
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Compare passwords
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_KEY || "I3AXLXwue87xy52iTDG7fQCRRwPS0Ryd",
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      token,
+      message: "Login successful",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;

@@ -5,8 +5,8 @@ import "./Navbar.css";
 const Navbar = () => {
   return (
     <nav className="navbar">
-      <div className="navbar-left">❤️ Connectify</div>
       <Link to="/messages" className="navbar-right">💬</Link>
+      <div className="navbar-left">❤️ Connectify</div>
     </nav>
   );
 };

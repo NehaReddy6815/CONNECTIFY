@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", // backend port, NOT 5173
+  baseURL: "http://localhost:5001/api", // moved to 5001 to avoid conflicts
 });
 
 // attach JWT automatically
@@ -11,9 +11,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-
-export const getPosts = () => API.get("/posts");
-export const createPost = (post) => API.post("/posts",post);
-
+// typed helper wrappers using the configured axios instance
+export const getPosts = () => api.get("/posts");
+export const createPost = (post) => api.post("/posts", post);
 
 export default api;

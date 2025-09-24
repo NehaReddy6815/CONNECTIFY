@@ -1,19 +1,66 @@
+/* Outer wrapper to center phone on the page */
 .home-container {
-  padding-top: 50px; /* space for navbar */
-  padding-bottom: 60px; /* space for bottom menu */
-  background-color: #f2f2f2;
+  display: flex;
+  justify-content: center; /* center horizontally */
+  align-items: center;     /* center vertically */
   min-height: 100vh;
-  font-family: Arial, sans-serif;
+  background-color: #e0e0e0; /* gray background for page */
 }
 
-.posts-feed {
-  padding: 10px;
-}
-
-.post-card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
+/* Phone frame */
+.phone-frame {
+  width: 360px;   /* typical mobile width */
+  height: 720px;  /* typical mobile height */
+  border: 16px solid #333;  /* phone border */
+  border-radius: 36px;
   background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* Scrollable content inside phone */
+.phone-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: 60px;  /* navbar height */
+  padding-bottom: 70px; /* bottom menu height */
+  background-color: #f5f5f5;
+}
+
+/* Posts feed */
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+/* Individual post card */
+.post-card {
+  background-color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  word-wrap: break-word;
+}
+
+.post-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #1e90ff;
+}
+
+/* Scrollbar styling (optional) */
+.phone-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.phone-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
 }

@@ -12,18 +12,20 @@ const posts = [
 const Home = () => {
   return (
     <div className="home-container">
-      <Navbar />
-
-      <div className="posts-feed">
-        {posts.map((post, index) => (
-          <div key={index} className="post-card">
-            <strong>{post.user}</strong>
-            <p>{post.content}</p>
+      <div className="phone-frame">
+        <div className="phone-content">
+          <Navbar />
+          <div className="posts-feed">
+            {posts.map((post, index) => (
+              <div key={index} className="post-card">
+                <strong>{post.user}</strong>
+                <p>{post.content}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+        <BottomMenu />
       </div>
-
-      <BottomMenu />
     </div>
   );
 };
