@@ -31,14 +31,7 @@ app.use("/api/auth", authRoutes);
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-const commentRoutes = require("./routes/commentRoutes");
-app.use("/api/comments", commentRoutes);
 
-const notificationRoutes = require("./routes/notificationRoutes");
-app.use("/api/notifications", notificationRoutes);
-
-const messageRoutes = require("./routes/messageRoutes");
-app.use("/api/messages", messageRoutes);
 
 // Error handler (must be after routes)
 const errorMiddleware = require("./middleware/errorMiddleware");
