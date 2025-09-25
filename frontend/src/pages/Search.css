@@ -1,62 +1,83 @@
-/* Search.css */
-
-/* Mobile wrapper to center content */
-.mobile-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-  background-color: #f0f0f0; /* light background */
-  min-height: 100vh;
-}
-
 /* Simulate phone screen */
-.search-container {
-  width: 375px; /* typical mobile width */
-  max-width: 100%;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Input styling */
-.search-container input {
+.mobile-wrapper {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+  max-width: 400px; /* phone width */
+  height: 90vh; /* fit inside viewport */
+  margin: 20px auto;
+  padding: 15px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  background-color: #f8f8f8;
   border: 1px solid #ccc;
+  border-radius: 20px;
+  position: relative;
+  overflow-y: auto;
 }
 
-/* Button styling */
-.search-container button {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background-color: #007bff;
-  color: white;
+/* Fixed back button */
+.back-button {
+  position: fixed;
+  top: 25px;
+  left: calc(50% - 190px); /* align with left edge of phone wrapper */
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
   border-radius: 10px;
+  font-size: 0.9rem;
   cursor: pointer;
-  font-size: 16px;
+  z-index: 100;
 }
 
-.search-container button:hover {
-  background-color: #0056b3;
+.back-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Search container */
+.search-container {
+  margin-top: 60px; /* leave space for back button */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input box */
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+/* Results */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* User cards */
 .user-card {
-  padding: 10px;
-  margin-top: 10px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* No users text */
-.results p {
-  margin-top: 10px;
-  text-align: center;
-  color: #888;
+.user-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.user-card p {
+  margin: 3px 0;
+  font-size: 0.9rem;
+}
+
+/* Error message */
+.error {
+  color: red;
+  font-size: 0.9rem;
 }
