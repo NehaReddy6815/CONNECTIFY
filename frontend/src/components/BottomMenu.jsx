@@ -8,7 +8,7 @@ const BottomMenu = () => {
   const menuItems = [
     { name: "Home", icon: "🏠", path: "/home" },
     { name: "Search", icon: "🔍", path: "/search" },
-    { name: "Add", icon: "➕", path: "/add-post" },
+    { name: "Add", icon: "➕", path: "/addPost" },
     { name: "Profile", icon: "👤", path: "/profile" },
   ];
 
