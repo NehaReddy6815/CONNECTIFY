@@ -1,265 +1,113 @@
-/* Outer container */
-.profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #e0e0e0;
-  font-family: Arial, sans-serif;
-}
-
-/* Phone frame */
 .phone-frame {
-  width: 360px;
-  height: 720px;
-  border: 16px solid #333;
-  border-radius: 36px;
-  background-color: #fff;
+  max-width: 420px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  background: #fff;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  min-height: 90vh;
   position: relative;
 }
 
-/* Scrollable content */
+/* Make navbar fixed inside the phone */
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #fff;
+  z-index: 10;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Add spacing so content starts below navbar */
 .phone-content {
   flex: 1;
-  overflow-y: auto;
-  padding-top: 60px;    /* navbar height */
-  padding-bottom: 70px; /* bottom menu height */
-  background-color: #f5f5f5;
-}
-
-/* Loading and error messages */
-.loading,
-.error-message {
   padding: 20px;
+  padding-top: 70px; /* ✅ space for navbar */
+  overflow-y: auto;
   text-align: center;
+}
+
+.emoji-avatar {
+  font-size: 65px;
+  margin: 20px 0;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 10px 0 5px;
+}
+
+.profile-bio {
+  font-size: 15px;
   color: #555;
+  margin-bottom: 20px;
+  padding: 0 15px;
 }
 
-/* Profile Info Section (top 30% height) */
-.profile-info {
-  background-color: #fff;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-bottom: 1px solid #ddd;
-}
-
-/* Top row: avatar + user details */
-.profile-top {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  margin-right: 16px;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-details h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #1e90ff;
-}
-
-.username {
-  font-size: 12px;
-  color: #555;
-  margin: 2px 0;
-}
-
-/* Stats: posts / followers / following */
-.profile-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
-.profile-stats .stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-stats .stat strong {
-  font-size: 16px;
-  color: #333;
-}
-
-/* Profile actions: Edit / Logout buttons */
-.profile-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.edit-profile-btn,
-.logout-btn {
-  flex: 1;
-  padding: 6px 0;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #1e90ff;
-  background-color: #fff;
-  color: #1e90ff;
+.edit-profile-btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  background: #007bff;
+  color: white;
+  font-size: 15px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
+  margin-bottom: 25px;
 }
 
-.edit-profile-btn:hover,
-.logout-btn:hover {
-  background-color: #1e90ff;
-  color: #fff;
+.edit-profile-btn:hover {
+  background: #0056b3;
 }
 
 /* Posts Section */
-.profile-posts-section {
-  padding: 8px 16px;
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
-.profile-posts-section h3 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #333;
-}
-
-.no-posts {
-  text-align: center;
-  color: #777;
-  font-size: 12px;
-  padding: 12px 0;
-}
-
-/* Individual Post Cards */
-.profile-posts {
+.posts-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
+  text-align: left;
 }
 
 .post-card {
-  background-color: #fff;
-  padding: 12px;
+  background: #f9f9f9;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  word-wrap: break-word;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 12px;
-  color: #555;
-}
-
-.post-content {
+.post-text {
   font-size: 14px;
-  margin-bottom: 6px;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .post-image {
   width: 100%;
+  max-height: 200px;
+  object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.post-stats {
-  display: flex;
-  gap: 12px;
+.post-date {
   font-size: 12px;
   color: #777;
 }
 
-/* Navbar.css inside phone frame */
-.navbar {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 60px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-.navbar-left {
-  font-size: 24px;
-  color: #555;
-  text-decoration: none;
-}
-
-.navbar-left:hover {
-  color: #1e90ff;
-}
-
-.navbar-right {
-  font-size: 20px;
-  font-weight: bold;
-  color: #1e90ff;
-  text-align: right;
-}
-
-/* BottomMenu.css inside phone frame */
-.bottom-menu {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #fff;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-.bottom-menu-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: #555;
-  font-size: 12px;
-  transition: color 0.2s;
-}
-
-.bottom-menu-item:hover {
-  color: #1e90ff;
-}
-
-.bottom-menu-icon {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.bottom-menu-label {
-  font-size: 10px;
-}
-
-.bottom-menu-item.active {
-  color: #1e90ff;
+.no-posts {
+  font-size: 14px;
+  color: #777;
 }
