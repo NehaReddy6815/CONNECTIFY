@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
+
 const app = express();
 
 // Middleware
@@ -31,7 +32,8 @@ app.use("/api/auth", authRoutes);
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
-
+const editProfileRoutes = require("./routes/editProfileRoutes");
+app.use("/api/users", editProfileRoutes); 
 
 // Error handler (must be after routes)
 const errorMiddleware = require("./middleware/errorMiddleware");
