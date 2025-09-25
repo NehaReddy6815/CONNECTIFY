@@ -1,0 +1,62 @@
+/* Search.css */
+
+/* Mobile wrapper to center content */
+.mobile-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f0f0f0; /* light background */
+  min-height: 100vh;
+}
+
+/* Simulate phone screen */
+.search-container {
+  width: 375px; /* typical mobile width */
+  max-width: 100%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Input styling */
+.search-container input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+/* Button styling */
+.search-container button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.search-container button:hover {
+  background-color: #0056b3;
+}
+
+/* User cards */
+.user-card {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* No users text */
+.results p {
+  margin-top: 10px;
+  text-align: center;
+  color: #888;
+}

@@ -5,7 +5,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AddPost from "./pages/AddPost";
-
+import Search from   "./pages/Search";
 function App() {
   return (
     <Router>
@@ -15,7 +15,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/addPost" element={<AddPost />} />
-        
+         <Route path="/search" element={<Search />} />
 
 
       </Routes>

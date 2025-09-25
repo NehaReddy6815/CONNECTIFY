@@ -14,8 +14,10 @@ app.use(express.static("public"));
 
 // Enable CORS for frontend
 app.use(cors({
-  origin: "http://localhost:5173", // frontend dev server
-  credentials: true
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Add both localhost and 127.0.0.1
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 
@@ -29,8 +31,8 @@ app.use("/api/posts", postRoutes);
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
-const userRoutes = require("./routes/userRoutes");
-app.use("/api/users", userRoutes);
+const searchRoutes = require("./routes/searchRoutes");
+app.use("/api/search", searchRoutes);
 
 const editProfileRoutes = require("./routes/editProfileRoutes");
 app.use("/api/users", editProfileRoutes); 
