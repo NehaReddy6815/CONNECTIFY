@@ -1,66 +1,36 @@
+/* Home.css */
 /* Outer wrapper to center phone on the page */
 .home-container {
-  display: flex;
-  justify-content: center; /* center horizontally */
-  align-items: center;     /* center vertically */
-  min-height: 100vh;
-  background-color: #e0e0e0; /* gray background for page */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e0e0e0;
 }
 
-/* Phone frame */
+/* Phone frame - The container for the absolute elements */
 .phone-frame {
-  width: 360px;   /* typical mobile width */
-  height: 720px;  /* typical mobile height */
-  border: 16px solid #333;  /* phone border */
-  border-radius: 36px;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  position: relative;
+    width: 360px;
+    height: 720px;
+    border: 16px solid #333; /* Keeping the border you provided */
+    border-radius: 36px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Hides horizontal scrollbar if elements are correctly sized */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    position: relative; /* CRITICAL: Positioning context for Navbar/Menu */
 }
 
 /* Scrollable content inside phone */
 .phone-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding-top: 60px;  /* navbar height */
-  padding-bottom: 70px; /* bottom menu height */
-  background-color: #f5f5f5;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* CRITICAL: Reserves space for the absolute Navbar (60px) and Menu (70px) */
+    padding-top: 60px;
+    padding-bottom: 70px; 
+    background-color: #f5f5f5;
 }
 
-/* Posts feed */
-.posts-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 16px;
-}
-
-/* Individual post card */
-.post-card {
-  background-color: #fff;
-  padding: 12px 16px;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  word-wrap: break-word;
-}
-
-.post-card strong {
-  display: block;
-  margin-bottom: 6px;
-  color: #1e90ff;
-}
-
-/* Scrollbar styling (optional) */
-.phone-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.phone-content::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
-  border-radius: 3px;
-}

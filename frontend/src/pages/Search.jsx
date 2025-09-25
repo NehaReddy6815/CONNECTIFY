@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+import Navbar from "../components/Navbar"; // adjust path
+import BottomMenu from "../components/BottomMenu"; // adjust path
 import "./Search.css";
 
 const Search = () => {
@@ -40,41 +43,49 @@ const Search = () => {
       }
     };
 
-    const timeoutId = setTimeout(() => fetchUsers(), 300);
+    const timeoutId = setTimeout(() => fetchUsers(), 300); // debounce
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
   return (
-    <div className="mobile-wrapper">
-      {/* Back Button */}
-      <button className="back-button" onClick={() => navigate("/home")}>
-        ← Back
-      </button>
+    <div className="center-wrapper">
+      <div className="phone-wrapper">
+        <Navbar />
 
-      <div className="search-container">
-        <h2>Search Users</h2>
-        <input
-          type="text"
-          placeholder="Enter name"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="search-content">
+          <button className="back-button" onClick={() => navigate("/home")}>
+            ← Back
+          </button>
 
-        <div className="results">
-          {loading && <p>Searching...</p>}
-          {error && <p className="error">{error}</p>}
-          {!loading && users.length > 0 ? (
-            users.map((user) => (
-              <div key={user._id} className="user-card">
-                <h3>{user.name}</h3>
-                <p>{user.email}</p>
-                {user.bio && <p><em>{user.bio}</em></p>}
-              </div>
-            ))
-          ) : (
-            !loading && searchQuery.trim() && !error && <p>No users found</p>
-          )}
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
+            <div className="results">
+              {loading && <p>Searching...</p>}
+              {error && <p className="error">{error}</p>}
+              {!loading && users.length > 0 ? (
+                users.map((user) => (
+                  <div key={user._id} className="user-card">
+                    <h3>{user.name}</h3>
+                    <p>{user.email}</p>
+                    {user.bio && <p><em>{user.bio}</em></p>}
+                  </div>
+                ))
+              ) : (
+                !loading &&
+                searchQuery.trim() &&
+                !error && <p>No users found</p>
+              )}
+            </div>
+          </div>
         </div>
+
+        <BottomMenu />
       </div>
     </div>
   );

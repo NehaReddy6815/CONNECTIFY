@@ -1,3 +1,5 @@
+/* Navbar.css */
+
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -5,15 +7,20 @@
   padding: 12px 18px;
   background: #fff;
   border-bottom: 1px solid #eee;
-  position: sticky;
-  top: 0;
+  
+  /* --- 🛑 FIX: REMOVE POSITIONING --- */
+  /* position: sticky; */ 
+  /* top: 0; */
+  /* ---------------------------------- */
+  
+  width: 100%; /* Ensure it spans the full width of the phone-wrapper */
   z-index: 10;
 }
 
 .navbar-left {
   font-size: 18px;
   font-weight: bold;
-  color: #e63946; /* red like heart */
+  color: #e63946;
 }
 
 .navbar-right {

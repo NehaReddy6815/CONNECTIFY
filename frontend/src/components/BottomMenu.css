@@ -1,10 +1,15 @@
+/* BottomMenu.css */
+
 .bottom-menu {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
+  /* --- 🛑 FIX: REMOVE ABSOLUTE POSITIONING --- */
+  /* position: absolute; */ 
+  /* bottom: 0; */
+  /* ------------------------------------------- */
+
+  width: 100%; /* Ensure it spans the full width of the phone-wrapper */
   height: 70px;
   display: flex;
-  justify-content: space-around; /* evenly space items */
+  justify-content: space-around;
   align-items: center;
   background-color: #fff;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
