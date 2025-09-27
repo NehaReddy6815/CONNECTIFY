@@ -37,6 +37,9 @@ app.use("/api/search", searchRoutes);
 const editProfileRoutes = require("./routes/editProfileRoutes");
 app.use("/api/users", editProfileRoutes); 
 
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes);
+
 // Error handler (must be after routes)
 const errorMiddleware = require("./middleware/errorMiddleware");
 app.use(errorMiddleware);

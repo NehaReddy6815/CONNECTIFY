@@ -26,8 +26,10 @@
 .phone-content {
     flex: 1;
     display: flex;
+    max-width: 100%; 
+    box-sizing: border-box; 
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: hidden;
     /* CRITICAL: Reserves space for the absolute Navbar (60px) and Menu (70px) */
     padding-top: 60px;
     padding-bottom: 70px; 
