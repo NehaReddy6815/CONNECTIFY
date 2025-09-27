@@ -40,6 +40,10 @@ app.use("/api/users", editProfileRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+const commentRoutes = require("./routes/commentsRoutes");
+app.use("/api/comments", commentRoutes);
+
+
 // Error handler (must be after routes)
 const errorMiddleware = require("./middleware/errorMiddleware");
 app.use(errorMiddleware);

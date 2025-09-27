@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
+import CommentSection from "../components/Comments";
 import "./AddPost.css";
 
 const AddPost = () => {
@@ -10,18 +11,21 @@ const AddPost = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [comments, setComments] = useState([]); // new comment state
-  const [commentText, setCommentText] = useState(""); // text for new comment
+  const [newPostData, setNewPostData] = useState(null);
   const navigate = useNavigate();
 
+  // Handle image selection
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
+
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         setError("Image size must be less than 2MB");
         return;
       }
+
       setSelectedImage(file);
+
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
@@ -45,6 +49,7 @@ const AddPost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!text.trim() && !selectedImage) {
       setError("Please add some text or select an image");
       return;
@@ -64,14 +69,11 @@ const AddPost = () => {
       const userId = tokenPayload.id;
 
       let imageData = null;
-      if (selectedImage) imageData = await convertToBase64(selectedImage);
+      if (selectedImage) {
+        imageData = await convertToBase64(selectedImage);
+      }
 
-      const postData = {
-        userId,
-        text: text.trim(),
-        image: imageData,
-        comments, // include comments array
-      };
+      const postData = { userId, text: text.trim(), image: imageData };
 
       const response = await fetch("http://localhost:5000/api/posts", {
         method: "POST",
@@ -83,14 +85,13 @@ const AddPost = () => {
       });
 
       if (response.ok) {
+        const createdPost = await response.json();
+        setNewPostData(createdPost);
         setText("");
         setSelectedImage(null);
         setImagePreview("");
-        setComments([]);
-        setCommentText("");
         setError("");
         document.getElementById("gallery-input").value = "";
-        navigate("/home");
       } else {
         const errData = await response.json();
         setError(errData.message || "Failed to add post");
@@ -100,13 +101,6 @@ const AddPost = () => {
       setError("Error creating post");
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleAddComment = () => {
-    if (commentText.trim()) {
-      setComments([...comments, commentText.trim()]);
-      setCommentText("");
     }
   };
 
@@ -126,6 +120,7 @@ const AddPost = () => {
             onChange={(e) => setText(e.target.value)}
           />
 
+          {/* Gallery Upload */}
           <div className="upload-section">
             <input
               id="gallery-input"
@@ -140,6 +135,7 @@ const AddPost = () => {
             </label>
           </div>
 
+          {/* Preview */}
           {imagePreview && (
             <div className="image-preview-section">
               <div className="preview-header">
@@ -155,27 +151,6 @@ const AddPost = () => {
               <img src={imagePreview} alt="Preview" className="preview-image" />
             </div>
           )}
-
-          {/* Comments Section */}
-          <div className="comments-section">
-            <h4>Comments</h4>
-            <div className="add-comment">
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-              <button type="button" onClick={handleAddComment}>
-                ➕
-              </button>
-            </div>
-            <ul className="comments-list">
-              {comments.map((c, idx) => (
-                <li key={idx}>{c}</li>
-              ))}
-            </ul>
-          </div>
 
           <div className="form-buttons">
             <button
@@ -196,6 +171,17 @@ const AddPost = () => {
             </button>
           </div>
         </form>
+
+        {/* Show newly created post with comments */}
+        {newPostData && (
+          <div className="new-post-preview">
+            <p>{newPostData.text}</p>
+            {newPostData.image && (
+              <img src={newPostData.image} alt="post" className="new-post-image" />
+            )}
+            <CommentSection postId={newPostData._id} />
+          </div>
+        )}
       </div>
       <BottomMenu />
     </div>
