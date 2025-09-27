@@ -10,51 +10,41 @@ const AddPost = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [comments, setComments] = useState([]); // new comment state
+  const [commentText, setCommentText] = useState(""); // text for new comment
   const navigate = useNavigate();
 
-  // Handle image selection from gallery
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
-    
     if (file) {
-      // Validate file size (max 2MB for base64)
       if (file.size > 2 * 1024 * 1024) {
         setError("Image size must be less than 2MB");
         return;
       }
-
       setSelectedImage(file);
-      
-      // Create preview URL
       const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onload = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
       setError("");
     }
   };
 
-  // Remove selected image
   const removeImage = () => {
     setSelectedImage(null);
     setImagePreview("");
-    document.getElementById('gallery-input').value = '';
+    document.getElementById("gallery-input").value = "";
   };
 
-  // Convert image to base64
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
+  const convertToBase64 = (file) =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!text.trim() && !selectedImage) {
       setError("Please add some text or select an image");
       return;
@@ -74,36 +64,32 @@ const AddPost = () => {
       const userId = tokenPayload.id;
 
       let imageData = null;
-      if (selectedImage) {
-        // Convert image to base64
-        imageData = await convertToBase64(selectedImage);
-      }
+      if (selectedImage) imageData = await convertToBase64(selectedImage);
 
-      // Send as JSON (not FormData)
       const postData = {
         userId,
         text: text.trim(),
-        image: imageData // Base64 string or null
+        image: imageData,
+        comments, // include comments array
       };
 
       const response = await fetch("http://localhost:5000/api/posts", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // JSON, not FormData
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(postData), // JSON, not FormData
+        body: JSON.stringify(postData),
       });
 
       if (response.ok) {
-        // Clear form
         setText("");
         setSelectedImage(null);
         setImagePreview("");
+        setComments([]);
+        setCommentText("");
         setError("");
-        document.getElementById('gallery-input').value = '';
-        
-        // Navigate to home to see the new post
+        document.getElementById("gallery-input").value = "";
         navigate("/home");
       } else {
         const errData = await response.json();
@@ -117,10 +103,17 @@ const AddPost = () => {
     }
   };
 
+  const handleAddComment = () => {
+    if (commentText.trim()) {
+      setComments([...comments, commentText.trim()]);
+      setCommentText("");
+    }
+  };
+
   return (
     <div className="phone-frame">
       <Navbar />
-      <div className="phone-content">
+      <div className="phone-content addpost-content">
         <h2 className="addpost-title">Create a Post</h2>
 
         {error && <p className="error-msg">{error}</p>}
@@ -133,7 +126,6 @@ const AddPost = () => {
             onChange={(e) => setText(e.target.value)}
           />
 
-          {/* Gallery Upload Button */}
           <div className="upload-section">
             <input
               id="gallery-input"
@@ -141,19 +133,22 @@ const AddPost = () => {
               accept="image/*"
               capture="environment"
               onChange={handleImageSelect}
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
             />
             <label htmlFor="gallery-input" className="gallery-btn">
               📱 Choose from Gallery
             </label>
           </div>
 
-          {/* Image Preview */}
           {imagePreview && (
             <div className="image-preview-section">
               <div className="preview-header">
                 <span>Selected Image:</span>
-                <button type="button" onClick={removeImage} className="remove-btn">
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="remove-btn"
+                >
                   ❌ Remove
                 </button>
               </div>
@@ -161,15 +156,36 @@ const AddPost = () => {
             </div>
           )}
 
+          {/* Comments Section */}
+          <div className="comments-section">
+            <h4>Comments</h4>
+            <div className="add-comment">
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+              />
+              <button type="button" onClick={handleAddComment}>
+                ➕
+              </button>
+            </div>
+            <ul className="comments-list">
+              {comments.map((c, idx) => (
+                <li key={idx}>{c}</li>
+              ))}
+            </ul>
+          </div>
+
           <div className="form-buttons">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="post-button"
               disabled={uploading || (!text.trim() && !selectedImage)}
             >
               {uploading ? "📤 Posting..." : "📝 Post"}
             </button>
-            
+
             <button
               type="button"
               className="cancel-button"

@@ -1,209 +1,40 @@
-/* AddPost.css */
-
-.addpost-title {
-  text-align: center;
-  color: #333;
-  margin-bottom: 24px;
-  font-size: 24px;
-  font-weight: bold;
+.comments-section {
+  margin-top: 16px;
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
 }
 
-/* File upload styles */
-.file-upload-section {
-  margin: 16px 0;
-}
-
-.file-upload-btn {
-  display: inline-block;
-  width: 100%;
-  padding: 16px;
-  background-color: #4CAF50;
-  color: white;
-  text-align: center;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  transition: background-color 0.2s, transform 0.1s;
-  box-sizing: border-box;
-}
-
-.file-upload-btn:hover {
-  background-color: #45a049;
-  transform: translateY(-1px);
-}
-
-.file-upload-btn:active {
-  transform: translateY(0);
-}
-
-.file-input-hidden {
-  display: none;
-}
-
-.addpost-form {
-  padding: 0 16px;
+.add-comment {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.post-textarea {
-  width: 100%;
-  min-height: 120px;
-  padding: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: inherit;
-  resize: vertical;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-
-.post-textarea:focus {
-  outline: none;
-  border-color: #1e90ff;
-  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
-}
-
-.post-input {
-  width: 100%;
-  padding: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: inherit;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-
-.post-input:focus {
-  outline: none;
-  border-color: #1e90ff;
-  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
-}
-
-.image-preview-container {
-  margin: 16px 0;
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  border: 2px dashed #ddd;
-}
-
-.preview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.preview-label {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-.remove-image-btn {
-  background: none;
-  border: none;
-  color: #ff4444;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-.remove-image-btn:hover {
-  background-color: #ffe6e6;
-}
-
-.image-preview {
-  width: 100%;
-  max-height: 250px;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.file-info {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #888;
-  text-align: center;
-}
-
-.button-group {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.post-btn {
+.add-comment input {
   flex: 1;
-  padding: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.add-comment button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
   background-color: #1e90ff;
   color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
 }
 
-.post-btn:hover:not(:disabled) {
-  background-color: #1c7ed6;
-  transform: translateY(-1px);
-}
-
-.post-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.post-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.cancel-btn {
-  flex: 1;
-  padding: 16px;
-  background-color: transparent;
-  color: #666;
-  border: 2px solid #ddd;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cancel-btn:hover {
-  background-color: #f5f5f5;
-  border-color: #bbb;
-  transform: translateY(-1px);
-}
-
-.cancel-btn:active {
-  transform: translateY(0);
-}
-
-.error-msg {
-  background-color: #fee;
-  color: #c33;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 14px;
+.comments-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.error-msg.small {
-  font-size: 12px;
-  padding: 8px;
-  margin-top: -8px;
+.comments-list li {
+  background: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
 }

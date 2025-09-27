@@ -1,9 +1,22 @@
-/* Profile.css */
+/* Profile.css - Fixed navbar overlap issue */
+
+.profile-content {
+  padding: 80px 16px 80px; /* Increased top padding for navbar clearance */
+  overflow-y: auto;
+  flex: 1;
+  box-sizing: border-box;
+  /* Ensure content starts below navbar */
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
 
 .profile-container {
   padding: 20px 16px;
   max-width: 100%;
   box-sizing: border-box;
+  /* Add margin top as extra safety */
+  margin-top: 10px;
 }
 
 .profile-header {
@@ -14,6 +27,9 @@
   border-radius: 20px;
   margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  /* Ensure it's not hidden behind navbar */
+  position: relative;
+  z-index: 2;
 }
 
 .profile-avatar {
@@ -258,8 +274,13 @@
 
 /* Responsive Design */
 @media (max-width: 480px) {
+  .profile-content {
+    padding: 70px 12px 80px; /* Adjusted for mobile */
+  }
+  
   .profile-container {
     padding: 16px 12px;
+    margin-top: 5px; /* Reduced for mobile */
   }
   
   .profile-header {
@@ -319,4 +340,22 @@
   border-radius: 20px;
   backdrop-filter: blur(10px);
   z-index: -1;
+}
+
+/* Additional safety measures for navbar overlap */
+.phone-content.profile-content {
+  padding-top: 80px !important; /* Force adequate top padding */
+  min-height: calc(100vh - 160px); /* Account for navbar and bottom menu */
+}
+
+/* Ensure profile header is always visible */
+.profile-header {
+  margin-top: 0 !important;
+}
+
+/* Alternative approach - if navbar is fixed */
+@media (min-width: 481px) {
+  .profile-content {
+    padding-top: 100px; /* More generous padding for larger screens */
+  }
 }
