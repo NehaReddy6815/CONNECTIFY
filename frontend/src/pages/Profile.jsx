@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 import "./Profile.css";
 
 const Profile = () => {
+  const { id } = useParams(); // dynamic profile id
   const [userInfo, setUserInfo] = useState({});
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +21,7 @@ const Profile = () => {
           return;
         }
 
-        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        const userId = tokenPayload.id;
+        let userId = id || JSON.parse(atob(token.split(".")[1])).id;
 
         // Fetch user info
         const userResponse = await fetch(
@@ -33,18 +33,15 @@ const Profile = () => {
           }
         );
 
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUserInfo(userData);
-        }
+        if (!userResponse.ok) throw new Error("Failed to fetch user info");
+        const userData = await userResponse.json();
+        setUserInfo(userData);
 
         // Fetch user's posts
         const postsResponse = await fetch(
           `http://localhost:5000/api/posts/user/${userId}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -52,15 +49,10 @@ const Profile = () => {
           const postsData = await postsResponse.json();
           setUserPosts(postsData);
         } else {
-          // fallback if no user posts endpoint
-          const allPostsResponse = await fetch(
-            "http://localhost:5000/api/posts",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          // fallback: filter from all posts
+          const allPostsResponse = await fetch("http://localhost:5000/api/posts", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
           if (allPostsResponse.ok) {
             const allPosts = await allPostsResponse.json();
@@ -79,34 +71,58 @@ const Profile = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [id, navigate]);
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) {
+  // Delete account
+  const handleDeleteAccount = async () => {
+    if (
+      !window.confirm(
+        "⚠️ Are you sure you want to delete your account? This cannot be undone."
+      )
+    )
       return;
-    }
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:5000/api/posts/${postId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const userId = JSON.parse(atob(token.split(".")[1])).id;
+
+      const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
-        setUserPosts((prevPosts) =>
-          prevPosts.filter((post) => post._id !== postId)
-        );
+        localStorage.removeItem("token");
+        alert("Your account has been deleted.");
+        navigate("/");
+      } else {
+        alert("Failed to delete account.");
+      }
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      alert("Error deleting account.");
+    }
+  };
+
+  // Delete a post
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        setUserPosts((prev) => prev.filter((post) => post._id !== postId));
       } else {
         alert("Failed to delete post");
       }
@@ -148,35 +164,44 @@ const Profile = () => {
                   <span className="stat-number">{userPosts.length}</span>
                   <span className="stat-label">Posts</span>
                 </div>
+                <div className="stat">
+                  <span className="stat-number">{userInfo.followers?.length || 0}</span>
+                  <span className="stat-label">Followers</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">{userInfo.following?.length || 0}</span>
+                  <span className="stat-label">Following</span>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="profile-actions">
-              <button
-                className="add-post-btn"
-                onClick={() => navigate("/addPost")}
-              >
-                ➕ Create Post
-              </button>
-              <button className="logout-btn" onClick={handleLogout}>
-                🚪 Logout
-              </button>
-            </div>
+            {!id && (
+              <div className="profile-actions">
+                <button className="add-post-btn" onClick={() => navigate("/addPost")}>
+                  ➕ Create Post
+                </button>
+                <button className="logout-btn" onClick={handleLogout}>
+                  🚪 Logout
+                </button>
+                <button className="delete-account-btn" onClick={handleDeleteAccount}>
+                  ❌ Delete Account
+                </button>
+              </div>
+            )}
 
-            {/* User's Posts */}
+            {/* Posts */}
             <div className="posts-section">
-              <h3 className="posts-title">My Posts</h3>
+              <h3 className="posts-title">{id ? `${userInfo.username}'s Posts` : "My Posts"}</h3>
 
               {userPosts.length === 0 ? (
                 <div className="no-posts">
                   <p>No posts yet!</p>
-                  <button
-                    className="create-first-post-btn"
-                    onClick={() => navigate("/addPost")}
-                  >
-                    Create your first post 🎉
-                  </button>
+                  {!id && (
+                    <button className="create-first-post-btn" onClick={() => navigate("/addPost")}>
+                      Create your first post 🎉
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="posts-grid">
@@ -186,13 +211,15 @@ const Profile = () => {
                         <div className="post-date">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </div>
-                        <button
-                          className="delete-post-btn"
-                          onClick={() => handleDeletePost(post._id)}
-                          title="Delete post"
-                        >
-                          🗑️
-                        </button>
+                        {!id && (
+                          <button
+                            className="delete-post-btn"
+                            onClick={() => handleDeletePost(post._id)}
+                            title="Delete post"
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </div>
 
                       {post.text && <p className="post-text">{post.text}</p>}
@@ -203,9 +230,7 @@ const Profile = () => {
                             src={post.image}
                             alt="Post content"
                             className="post-image"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
+                            onError={(e) => (e.target.style.display = "none")}
                           />
                         </div>
                       )}

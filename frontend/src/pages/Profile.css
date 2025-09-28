@@ -1,69 +1,57 @@
-/* Profile.css - Fixed navbar overlap issue */
+/* Profile.css */
 
+/* Main phone content wrapper */
 .profile-content {
-  padding: 80px 16px 80px; /* Increased top padding for navbar clearance */
+  padding: 16px;
   overflow-y: auto;
-  flex: 1;
-  box-sizing: border-box;
-  /* Ensure content starts below navbar */
-  margin-top: 0;
-  position: relative;
-  z-index: 1;
+  height: calc(100% - 100px); /* leave room for navbar + bottom menu */
 }
 
+/* Profile container */
 .profile-container {
-  padding: 20px 16px;
-  max-width: 100%;
-  box-sizing: border-box;
-  /* Add margin top as extra safety */
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
+/* Profile header */
 .profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 30px 20px;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-  /* Ensure it's not hidden behind navbar */
-  position: relative;
-  z-index: 2;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
 }
 
 .profile-avatar {
-  font-size: 60px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  width: 100px;
-  height: 100px;
+  font-size: 64px;
+  background: #f0f0f0;
   border-radius: 50%;
+  width: 80px;
+  height: 80px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
-  backdrop-filter: blur(10px);
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  align-items: center;
 }
 
 .profile-name {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: bold;
-  margin: 0 0 8px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 8px;
 }
 
 .profile-email {
-  font-size: 16px;
-  opacity: 0.9;
-  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .profile-stats {
   display: flex;
-  justify-content: center;
-  gap: 30px;
+  gap: 24px;
+  margin-top: 12px;
 }
 
 .stat {
@@ -73,289 +61,160 @@
 }
 
 .stat-number {
-  font-size: 24px;
+  font-size: 16px;
   font-weight: bold;
 }
 
 .stat-label {
-  font-size: 14px;
-  opacity: 0.8;
+  font-size: 12px;
+  color: #777;
 }
 
+/* Buttons */
 .profile-actions {
   display: flex;
+  justify-content: center;
   gap: 12px;
-  margin-bottom: 30px;
+  margin: 12px 0;
+}
+
+.add-post-btn,
+.logout-btn,
+.create-first-post-btn,
+.delete-account-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .add-post-btn {
-  flex: 1;
-  padding: 16px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
 .add-post-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+  background-color: #0056b3;
 }
 
 .logout-btn {
-  flex: 1;
-  padding: 16px;
-  background: linear-gradient(135deg, #dc3545, #c82333);
+  background-color: #6c757d;
   color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
 .logout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+  background-color: #5a6268;
 }
 
+.create-first-post-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.create-first-post-btn:hover {
+  background-color: #1e7e34;
+}
+
+.delete-account-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-account-btn:hover {
+  background-color: #c82333;
+}
+
+/* Posts section */
 .posts-section {
-  margin-top: 30px;
+  width: 100%;
 }
 
 .posts-title {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
+  margin-bottom: 12px;
 }
 
 .no-posts {
   text-align: center;
-  padding: 40px 20px;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 16px;
   color: #666;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-top: 16px;
 }
 
-.no-posts p {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: #555;
-}
-
-.create-first-post-btn {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-}
-
-.create-first-post-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
-}
-
+/* Post grid */
 .posts-grid {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
 .profile-post-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.profile-post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  border-color: rgba(102, 126, 234, 0.2);
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .post-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.post-date {
   font-size: 12px;
   color: #888;
-  background: linear-gradient(135deg, #f1f3f4, #e8eaed);
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-weight: 500;
 }
 
 .delete-post-btn {
-  background: rgba(220, 53, 69, 0.1);
   border: none;
-  font-size: 16px;
+  background: transparent;
   cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  color: #dc3545;
+  font-size: 16px;
 }
 
 .delete-post-btn:hover {
-  background: rgba(220, 53, 69, 0.2);
-  transform: scale(1.1);
+  color: #e63946;
 }
 
 .post-text {
-  color: #333;
-  line-height: 1.6;
-  margin: 0 0 12px 0;
-  font-size: 15px;
-  font-weight: 400;
+  margin: 8px 0;
+  font-size: 14px;
 }
 
 .post-image-container {
-  margin-top: 12px;
-  border-radius: 12px;
+  margin-top: 8px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .post-image {
   width: 100%;
   height: auto;
-  max-height: 300px;
-  object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
 }
 
-.post-image:hover {
-  transform: scale(1.02);
-}
-
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  font-size: 18px;
-  color: #666;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 16px;
-  margin: 20px;
-}
-
+/* Error message */
 .error-msg {
-  background: linear-gradient(135deg, #f8d7da, #f5c2c7);
-  color: #721c24;
-  padding: 12px 16px;
-  border-radius: 12px;
-  text-align: center;
-  margin-bottom: 20px;
-  border: 1px solid #f1aeb5;
-  font-weight: 500;
+  color: red;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.follow-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-  .profile-content {
-    padding: 70px 12px 80px; /* Adjusted for mobile */
-  }
-  
-  .profile-container {
-    padding: 16px 12px;
-    margin-top: 5px; /* Reduced for mobile */
-  }
-  
-  .profile-header {
-    padding: 24px 16px;
-  }
-  
-  .profile-name {
-    font-size: 24px;
-  }
-  
-  .profile-avatar {
-    width: 80px;
-    height: 80px;
-    font-size: 48px;
-  }
-  
-  .profile-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .posts-title {
-    font-size: 20px;
-  }
+.follow-btn.following {
+  background-color: #6c757d;
 }
 
-/* Animation for new posts */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.follow-btn:hover {
+  opacity: 0.9;
 }
 
-.profile-post-card {
-  animation: slideInUp 0.5s ease-out;
-}
-
-/* Smooth scrolling for posts section */
-.posts-section {
-  scroll-behavior: smooth;
-}
-
-/* Glassmorphism effect for better visual appeal */
-.profile-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  z-index: -1;
-}
-
-/* Additional safety measures for navbar overlap */
-.phone-content.profile-content {
-  padding-top: 80px !important; /* Force adequate top padding */
-  min-height: calc(100vh - 160px); /* Account for navbar and bottom menu */
-}
-
-/* Ensure profile header is always visible */
-.profile-header {
-  margin-top: 0 !important;
-}
-
-/* Alternative approach - if navbar is fixed */
-@media (min-width: 481px) {
-  .profile-content {
-    padding-top: 100px; /* More generous padding for larger screens */
-  }
-}

@@ -5,19 +5,18 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AddPost from "./pages/AddPost";
-import Search from   "./pages/Search";
+import Search from "./pages/Search";
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />   {/* Login/Register handled here */}
+        <Route path="/" element={<Login />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:id?" element={<Profile />} /> {/* ID is optional */}
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/addPost" element={<AddPost />} />
-         <Route path="/search" element={<Search />} />
-
-
+        <Route path="/search" element={<Search />} />
       </Routes>
     </Router>
   );
