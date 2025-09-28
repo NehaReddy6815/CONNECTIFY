@@ -1,50 +1,19 @@
+// routes/postRoutes.js
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 
-// ----------------------
-// Create a new post
-// ----------------------
-router.post("/", async (req, res) => {
-  try {
-    const newPost = new Post({
-      userId: req.body.userId, // logged-in user's ID
-      text: req.body.text || "", // post content
-      image: req.body.image || "", // optional image
-    });
-    const savedPost = await newPost.save();
-    res.json(savedPost);
-  } catch (err) {
-    console.error("Error creating post:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
-// ----------------------
-// Get all posts
-// ----------------------
-router.get("/", async (req, res) => {
-  try {
-    const posts = await Post.find()
-      .sort({ createdAt: -1 }) // latest first
-      .populate("userId", "username email"); // populate username & email
-    res.json(posts);
-  } catch (err) {
-    console.error("Error fetching posts:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ----------------------
 // Get posts by a specific user
-// ----------------------
 router.get("/user/:userId", async (req, res) => {
-  const { userId } = req.params;
   try {
+    const userId = req.params.userId;
+
     const posts = await Post.find({ userId })
       .sort({ createdAt: -1 })
-      .populate("userId", "username email"); // populate username & email
+      .populate("userId", "username profilePicture");
+
     res.json(posts);
   } catch (err) {
     console.error("Error fetching user posts:", err);
@@ -52,16 +21,82 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-// ----------------------
-// Delete a post by ID (optional for Profile.jsx)
-// ----------------------
-router.delete("/:postId", async (req, res) => {
-  const { postId } = req.params;
+// Get posts from people you follow
+router.get("/", async (req, res) => {
   try {
-    await Post.findByIdAndDelete(postId);
-    res.json({ message: "Post deleted successfully" });
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const currentUserId = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).id;
+    const currentUser = await User.findById(currentUserId);
+
+    if (!currentUser) return res.status(404).json({ message: "User not found" });
+
+    // If following no one, return empty array
+    if (!currentUser.following || currentUser.following.length === 0) {
+      return res.json([]);
+    }
+
+    const posts = await Post.find({ userId: { $in: currentUser.following } })
+      .sort({ createdAt: -1 })
+      .populate("userId", "username profilePicture");
+
+    res.json(posts);
   } catch (err) {
-    console.error("Error deleting post:", err);
+    console.error("Error fetching posts:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Like / Unlike a post
+router.put("/:id/like", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const currentUserId = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).id;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (post.likes.includes(currentUserId)) {
+      // If already liked, unlike
+      post.likes = post.likes.filter((id) => id.toString() !== currentUserId);
+    } else {
+      post.likes.push(currentUserId);
+    }
+
+    await post.save();
+    res.json(post);
+  } catch (err) {
+    console.error("Error liking post:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a comment to a post
+router.post("/:id/comment", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const currentUserId = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).id;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const comment = {
+      userId: currentUserId,
+      text: req.body.text,
+      createdAt: new Date(),
+    };
+
+    post.comments.push(comment);
+    await post.save();
+
+    res.json(comment);
+  } catch (err) {
+    console.error("Error adding comment:", err);
     res.status(500).json({ error: err.message });
   }
 });

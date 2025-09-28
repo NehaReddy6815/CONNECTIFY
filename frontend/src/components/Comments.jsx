@@ -1,73 +1,47 @@
-import React, { useState, useEffect } from "react";
+// components/Comments.jsx
+import React, { useState } from "react";
+import axios from "axios";
 
-const CommentSection = ({ postId }) => {
-  const [comments, setComments] = useState([]);
+const Comments = ({ post, token, currentUserId }) => {
+  const [comments, setComments] = useState(post.comments || []);
   const [newComment, setNewComment] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const fetchComments = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/comments/${postId}`);
-      const data = await res.json();
-      setComments(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchComments();
-  }, [postId]);
-
-  const handleAddComment = async () => {
+  const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
-    setLoading(true);
-    const token = localStorage.getItem("token");
-    const userId = JSON.parse(atob(token.split(".")[1])).id;
 
     try {
-      const res = await fetch("http://localhost:5000/api/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ postId, userId, text: newComment }),
-      });
+      const res = await axios.post(
+        `http://localhost:5000/api/posts/${post._id}/comment`,
+        { text: newComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      if (res.ok) {
-        setNewComment("");
-        fetchComments();
-      }
+      setComments([...comments, res.data]);
+      setNewComment("");
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      console.error("Error posting comment:", err);
     }
   };
 
   return (
-    <div className="comment-section">
-      <div className="comments-list">
-        {comments.map((c) => (
-          <div key={c._id} className="comment">
-            <strong>{c.userId.name}:</strong> {c.text}
-          </div>
-        ))}
-      </div>
-      <div className="add-comment">
+    <div className="comments-section">
+      {comments.map((c) => (
+        <div key={c._id} className="comment">
+          <strong>{c.userId?.username || "Anonymous"}:</strong> {c.text}
+        </div>
+      ))}
+
+      <div className="comment-input-container">
         <input
           type="text"
-          placeholder="Add a comment..."
+          placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
-        <button onClick={handleAddComment} disabled={loading}>
-          {loading ? "Posting..." : "Post"}
-        </button>
+        <button onClick={handleSubmitComment}>Submit</button>
       </div>
     </div>
   );
 };
 
-export default CommentSection;
+export default Comments;
