@@ -70,12 +70,14 @@ const Search = () => {
   };
 
   return (
-    <div className="home-container">
-      <div className="phone-frame">
-        <Navbar />
-        <div className="phone-content">
+    <div className="search-container">
+      <div className="search-phone-frame">
+        <div className="search-navbar-wrapper">
+          <Navbar />
+        </div>
+        <div className="search-phone-content">
           <div className="search-header">
-            <button className="back-button" onClick={() => navigate("/home")}>
+            <button className="search-back-button" onClick={() => navigate("/home")}>
               ← Back
             </button>
             <input
@@ -86,27 +88,27 @@ const Search = () => {
             />
           </div>
 
-          <div className="results">
-            {loading && <p className="info-text">Searching...</p>}
-            {error && <p className="error">{error}</p>}
+          <div className="search-results">
+            {loading && <p className="search-info-text">Searching...</p>}
+            {error && <p className="search-error">{error}</p>}
 
             {!loading && users.length > 0
               ? users.map((user) => (
-                  <div key={user._id} className="user-card">
+                  <div key={user._id} className="search-user-card">
                     <div
-                      className="user-info"
+                      className="search-user-info"
                       onClick={() =>
                         navigate(`/profile/${user._id}`, { state: { fromSearch: true } })
                       }
                     >
-                      <h3 className="user-name">{user.username || user.name}</h3>
-                      <p className="user-email">{user.email}</p>
-                      {user.bio && <p className="user-bio">{user.bio}</p>}
+                      <h3 className="search-user-name">{user.username || user.name}</h3>
+                      <p className="search-user-email">{user.email}</p>
+                      {user.bio && <p className="search-user-bio">{user.bio}</p>}
                     </div>
                     {user._id !== currentUserId && (
                       <button
-                        className={`follow-btn ${
-                          user.followers?.includes(currentUserId) ? "following" : ""
+                        className={`search-follow-btn ${
+                          user.followers?.includes(currentUserId) ? "search-following" : ""
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -119,11 +121,13 @@ const Search = () => {
                   </div>
                 ))
               : !loading && searchQuery.trim() && !error && (
-                  <p className="info-text">No users found</p>
+                  <p className="search-info-text">No users found</p>
                 )}
           </div>
         </div>
-        <BottomMenu />
+        <div className="search-bottom-menu-wrapper">
+          <BottomMenu />
+        </div>
       </div>
     </div>
   );
