@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    text: { type: String }, // optional text
+    image: { type: String }, // optional image
   },
   { timestamps: true }
 );

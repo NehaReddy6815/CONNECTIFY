@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 import "./Profile.css";
 
 const Profile = () => {
   const { id } = useParams(); // dynamic profile id
+  const location = useLocation();
+  const fromSearch = location.state?.fromSearch;
+
   const [userInfo, setUserInfo] = useState({});
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,26 +27,17 @@ const Profile = () => {
         let userId = id || JSON.parse(atob(token.split(".")[1])).id;
 
         // Fetch user info
-        const userResponse = await fetch(
-          `http://localhost:5000/api/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        const userResponse = await fetch(`http://localhost:5000/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!userResponse.ok) throw new Error("Failed to fetch user info");
         const userData = await userResponse.json();
         setUserInfo(userData);
 
         // Fetch user's posts
-        const postsResponse = await fetch(
-          `http://localhost:5000/api/posts/user/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const postsResponse = await fetch(`http://localhost:5000/api/posts/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (postsResponse.ok) {
           const postsData = await postsResponse.json();
@@ -53,7 +47,6 @@ const Profile = () => {
           const allPostsResponse = await fetch("http://localhost:5000/api/posts", {
             headers: { Authorization: `Bearer ${token}` },
           });
-
           if (allPostsResponse.ok) {
             const allPosts = await allPostsResponse.json();
             const myPosts = allPosts.filter(
@@ -81,11 +74,7 @@ const Profile = () => {
 
   // Delete account
   const handleDeleteAccount = async () => {
-    if (
-      !window.confirm(
-        "⚠️ Are you sure you want to delete your account? This cannot be undone."
-      )
-    )
+    if (!window.confirm("⚠️ Are you sure you want to delete your account? This cannot be undone."))
       return;
 
     try {
@@ -151,6 +140,12 @@ const Profile = () => {
       <div className="phone-frame">
         <Navbar />
         <div className="phone-content profile-content">
+          <div className="profile-back">
+            <button className="back-button" onClick={() => navigate(fromSearch ? -1 : "/home")}>
+              ← Back
+            </button>
+          </div>
+
           <div className="profile-container">
             {error && <p className="error-msg">{error}</p>}
 
