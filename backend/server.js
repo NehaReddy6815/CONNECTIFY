@@ -12,13 +12,14 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// Enable CORS for frontend
+// Enable CORS for frontend (any localhost port during dev)
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Add both localhost and 127.0.0.1
+  origin: "http://localhost:5173", // frontend URL
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
 
 
 // Debug Mongo URI
