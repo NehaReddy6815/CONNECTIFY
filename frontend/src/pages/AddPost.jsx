@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 import CommentSection from "../components/Comments";
 
-
 const AddPost = () => {
   const [text, setText] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
@@ -14,18 +13,14 @@ const AddPost = () => {
   const [newPostData, setNewPostData] = useState(null);
   const navigate = useNavigate();
 
-  // Handle image selection
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
-
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         setError("Image size must be less than 2MB");
         return;
       }
-
       setSelectedImage(file);
-
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
@@ -49,7 +44,6 @@ const AddPost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!text.trim() && !selectedImage) {
       setError("Please add some text or select an image");
       return;
@@ -105,23 +99,29 @@ const AddPost = () => {
   };
 
   return (
-    <div className="phone-frame">
-      <Navbar />
-      <div className="phone-content addpost-content">
-        <h2 className="addpost-title">Create a Post</h2>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      {/* Navbar */}
+      <div className="sticky top-0 z-40">
+        <Navbar />
+      </div>
 
-        {error && <p className="error-msg">{error}</p>}
+      {/* Content */}
+      <div className="flex-1 w-full p-4 flex flex-col overflow-y-auto max-w-3xl mx-auto">
+        <h2 className="text-3xl font-bold mb-4 text-gray-900">Create a Post</h2>
 
-        <form onSubmit={handleSubmit} className="addpost-form">
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+          {/* Textarea */}
           <textarea
-            className="post-textarea"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none min-h-[100px] max-h-[200px] overflow-y-auto"
             placeholder="What's on your mind?"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
 
           {/* Gallery Upload */}
-          <div className="upload-section">
+          <div>
             <input
               id="gallery-input"
               type="file"
@@ -130,60 +130,64 @@ const AddPost = () => {
               onChange={handleImageSelect}
               style={{ display: "none" }}
             />
-            <label htmlFor="gallery-input" className="gallery-btn">
-              📱 Choose from Gallery
+            <label
+              htmlFor="gallery-input"
+              className="inline-block px-5 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full cursor-pointer hover:opacity-90 transition"
+            >
+               Choose Image
             </label>
           </div>
 
           {/* Preview */}
           {imagePreview && (
-            <div className="image-preview-section">
-              <div className="preview-header">
-                <span>Selected Image:</span>
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="remove-btn"
-                >
-                  ❌ Remove
-                </button>
-              </div>
-              <img src={imagePreview} alt="Preview" className="preview-image" />
+            <div className="relative mt-2 w-full border rounded-lg p-2 bg-white shadow-sm">
+              <img src={imagePreview} alt="Preview" className="w-full rounded-lg" />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow"
+              >
+                
+              </button>
             </div>
           )}
 
-          <div className="form-buttons">
+          {/* Buttons */}
+          <div className="flex gap-3 mt-3">
             <button
               type="submit"
-              className="post-button"
               disabled={uploading || (!text.trim() && !selectedImage)}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full shadow-md hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 transition"
             >
-              {uploading ? "📤 Posting..." : "📝 Post"}
+              {uploading ? " Posting..." : "Post"}
             </button>
-
             <button
               type="button"
-              className="cancel-button"
               onClick={() => navigate("/home")}
               disabled={uploading}
+              className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-full shadow hover:bg-gray-300 disabled:opacity-50 transition"
             >
-              ❌ Cancel
+               Cancel
             </button>
           </div>
         </form>
 
-        {/* Show newly created post with comments */}
+        {/* Newly created post */}
         {newPostData && (
-          <div className="new-post-preview">
-            <p>{newPostData.text}</p>
+          <div className="mt-6 border rounded-lg p-4 bg-white shadow w-full">
+            <p className="mb-2">{newPostData.text}</p>
             {newPostData.image && (
-              <img src={newPostData.image} alt="post" className="new-post-image" />
+              <img src={newPostData.image} alt="post" className="w-full rounded-lg mb-2" />
             )}
             <CommentSection postId={newPostData._id} />
           </div>
         )}
       </div>
-      <BottomMenu />
+
+      {/* Bottom Menu */}
+      <div className="sticky bottom-0 z-40">
+        <BottomMenu />
+      </div>
     </div>
   );
 };
