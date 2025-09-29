@@ -41,7 +41,7 @@ const Search = () => {
 
     const timer = setTimeout(fetchUsers, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, token]);
 
   const handleFollowUser = async (userIdToFollow) => {
     try {
@@ -105,11 +105,17 @@ const Search = () => {
                 key={user._id}
                 className="flex justify-between items-center p-4 bg-white rounded-lg shadow hover:shadow-md transition cursor-pointer"
                 onClick={() =>
-                  navigate(`/profile/${user._id}`, { state: { fromSearch: true } })
+                  navigate(
+                    user._id === currentUserId
+                      ? "/profile" // go to own profile
+                      : `/profile/${user._id}` // go to other user's profile
+                  )
                 }
               >
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{user.username || user.name}</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    {user.username || user.name}
+                  </h3>
                   <p className="text-gray-600 text-sm">{user.email}</p>
                   {user.bio && <p className="text-gray-600 text-sm">{user.bio}</p>}
                 </div>
@@ -125,7 +131,9 @@ const Search = () => {
                       handleFollowUser(user._id);
                     }}
                   >
-                    {user.followers?.includes(currentUserId) ? "Following" : "Follow"}
+                    {user.followers?.includes(currentUserId)
+                      ? "Following"
+                      : "Follow"}
                   </button>
                 )}
               </div>

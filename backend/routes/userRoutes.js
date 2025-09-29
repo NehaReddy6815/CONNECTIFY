@@ -15,6 +15,7 @@ router.get('/:userId', async (req, res) => {
 
     res.json({
       _id: user._id,
+      name: user.name,  
       username: user.username,
       email: user.email,
       createdAt: user.createdAt,
@@ -45,7 +46,7 @@ router.put('/:userId', async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { username: username || undefined, email: email || undefined, updatedAt: new Date() },
+      { username: username || undefined, email: email || undefined, name: name || undefined, updatedAt: new Date() },
       { new: true }
     ).select('-password');
 

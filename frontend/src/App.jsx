@@ -13,8 +13,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/profile/:id?" element={<Profile />} /> {/* ID is optional */}
-        <Route path="/edit-profile" element={<EditProfile />} />
+        {/* Corrected: Use a single route with an optional 'id' parameter */}
+        <Route path="/profile/:id?" element={<Profile />} /> 
+        <Route path="/EditProfile" element={<EditProfile />} />
         <Route path="/addPost" element={<AddPost />} />
         <Route path="/search" element={<Search />} />
       </Routes>

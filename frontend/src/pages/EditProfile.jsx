@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 
-
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -77,9 +76,9 @@ const EditProfile = () => {
 
   if (loading) {
     return (
-      <div className="phone-frame">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
         <Navbar />
-        <div className="phone-content">Loading...</div>
+        <div className="flex-1 flex items-center justify-center text-gray-700">Loading...</div>
         <BottomMenu />
       </div>
     );
@@ -87,56 +86,74 @@ const EditProfile = () => {
 
   if (error) {
     return (
-      <div className="phone-frame">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
         <Navbar />
-        <div className="phone-content">{error}</div>
+        <div className="flex-1 flex items-center justify-center text-red-500">{error}</div>
         <BottomMenu />
       </div>
     );
   }
 
   return (
-    <div className="phone-frame">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
       <Navbar />
-      <div className="phone-content">
-        <h2 className="title">Edit Profile</h2>
+
+      <div className="flex-1 w-full max-w-3xl mx-auto p-4 flex flex-col gap-6">
+        <h2 className="text-3xl font-bold text-gray-900 text-center">Edit Profile</h2>
 
         {/* Emoji Avatar */}
-        <div className="emoji-avatar">👤</div>
+        <div className="flex justify-center mb-4">
+          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-4xl">
+            👤
+          </div>
+        </div>
 
-        <form onSubmit={handleUpdateProfile} className="edit-profile-form">
+        {/* Form */}
+        <form onSubmit={handleUpdateProfile} className="flex flex-col gap-4 bg-white p-6 rounded-xl shadow-md">
           {/* Name */}
-          <label>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            required
-          />
+          <div className="flex flex-col gap-1">
+            <label className="font-semibold text-gray-700">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              required
+              className="px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 w-full"
+            />
+          </div>
 
           {/* Bio */}
-          <label>Bio</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Write something about yourself..."
-            rows="3"
-          />
+          <div className="flex flex-col gap-1">
+            <label className="font-semibold text-gray-700">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Write something about yourself..."
+              rows="3"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400 w-full resize-none"
+            />
+          </div>
 
           {/* Buttons */}
-          <div className="button-group">
-            <button type="submit" className="save-btn">Save</button>
+          <div className="flex gap-4 mt-4 flex-wrap justify-center">
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full shadow hover:from-pink-600 hover:to-purple-600 transition w-full sm:w-auto"
+            >
+              Save
+            </button>
             <button
               type="button"
-              className="cancel-btn"
               onClick={() => navigate("/profile")}
+              className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-full shadow hover:bg-gray-300 transition w-full sm:w-auto"
             >
               Cancel
             </button>
           </div>
         </form>
       </div>
+
       <BottomMenu />
     </div>
   );
