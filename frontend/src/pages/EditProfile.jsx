@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
-import "./EditProfile.css";
+
 
 const EditProfile = () => {
   const [name, setName] = useState("");

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 import CommentSection from "../components/Comments";
-import "./AddPost.css";
+
 
 const AddPost = () => {
   const [text, setText] = useState("");

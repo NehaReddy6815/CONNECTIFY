@@ -1,70 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
-import "./Profile.css";
+import Comments from "../components/Comments";
+import { useNavigate } from "react-router-dom";
+
 
 const Profile = () => {
-  const { id } = useParams(); // dynamic profile id
-  const location = useLocation();
-  const fromSearch = location.state?.fromSearch;
-
-  const [userInfo, setUserInfo] = useState({});
-  const [userPosts, setUserPosts] = useState([]);
+  const [user, setUser] = useState({});
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  const currentUserId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
+
+  // Fetch user info and posts
   useEffect(() => {
-    const fetchUserData = async () => {
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/");
-          return;
-        }
+        setLoading(true);
 
-        let userId = id || JSON.parse(atob(token.split(".")[1])).id;
-
-        // Fetch user info
-        const userResponse = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        // Get user info
+        const userRes = await axios.get(`http://localhost:5000/api/users/${currentUserId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!userResponse.ok) throw new Error("Failed to fetch user info");
-        const userData = await userResponse.json();
-        setUserInfo(userData);
+        setUser(userRes.data);
 
-        // Fetch user's posts
-        const postsResponse = await fetch(`http://localhost:5000/api/posts/user/${userId}`, {
+        // Get user posts
+        const postRes = await axios.get(`http://localhost:5000/api/posts/user/${currentUserId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (postsResponse.ok) {
-          const postsData = await postsResponse.json();
-          setUserPosts(postsData);
-        } else {
-          // fallback: filter from all posts
-          const allPostsResponse = await fetch("http://localhost:5000/api/posts", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (allPostsResponse.ok) {
-            const allPosts = await allPostsResponse.json();
-            const myPosts = allPosts.filter(
-              (post) => post.userId === userId || post.userId?._id === userId
-            );
-            setUserPosts(myPosts);
-          }
-        }
+        setPosts(postRes.data);
       } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError("Failed to load profile data");
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserData();
-  }, [id, navigate]);
+    fetchData();
+  }, [token, currentUserId, navigate]);
 
   // Logout
   const handleLogout = () => {
@@ -72,170 +53,77 @@ const Profile = () => {
     navigate("/");
   };
 
-  // Delete account
+  // Delete Account
   const handleDeleteAccount = async () => {
-    if (!window.confirm("⚠️ Are you sure you want to delete your account? This cannot be undone."))
-      return;
-
+    if (!window.confirm("Are you sure you want to delete your account?")) return;
     try {
-      const token = localStorage.getItem("token");
-      const userId = JSON.parse(atob(token.split(".")[1])).id;
-
-      const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
-        method: "DELETE",
+      await axios.delete(`http://localhost:5000/api/users/${currentUserId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.ok) {
-        localStorage.removeItem("token");
-        alert("Your account has been deleted.");
-        navigate("/");
-      } else {
-        alert("Failed to delete account.");
-      }
+      localStorage.removeItem("token");
+      navigate("/");
     } catch (err) {
-      console.error("Error deleting account:", err);
-      alert("Error deleting account.");
+      console.error(err);
     }
   };
-
-  // Delete a post
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        setUserPosts((prev) => prev.filter((post) => post._id !== postId));
-      } else {
-        alert("Failed to delete post");
-      }
-    } catch (err) {
-      console.error("Error deleting post:", err);
-      alert("Error deleting post");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="home-container">
-        <div className="phone-frame">
-          <Navbar />
-          <div className="phone-content profile-content">
-            <div className="loading">Loading profile...</div>
-          </div>
-          <BottomMenu />
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="home-container">
+    <div className="profile-container">
       <div className="phone-frame">
         <Navbar />
-        <div className="phone-content profile-content">
-          <div className="profile-back">
-            <button className="back-button" onClick={() => navigate(fromSearch ? -1 : "/home")}>
-              ← Back
+
+        {/* Profile Header */}
+        <div className="profile-header">
+          <div className="profile-avatar">
+            {user.profilePicture ? (
+              <img src={user.profilePicture} alt="Avatar" />
+            ) : (
+              <span role="img" aria-label="profile" className="default-avatar">
+                🐱
+              </span>
+            )}
+          </div>
+          <div className="profile-username">{user.username || "Anonymous"}</div>
+          <div className="profile-stats">
+            <span>{posts.length} posts</span> |{" "}
+            <span>{user.followers?.length || 0} followers</span> |{" "}
+            <span>{user.following?.length || 0} following</span>
+          </div>
+          {user.bio && <div className="profile-bio">{user.bio}</div>}
+
+          <div className="profile-actions">
+            <button className="edit-btn" onClick={() => navigate("/EditProfile")}>
+              Edit Profile
+            </button>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+            <button className="delete-btn" onClick={handleDeleteAccount}>
+              Delete Account
             </button>
           </div>
-
-          <div className="profile-container">
-            {error && <p className="error-msg">{error}</p>}
-
-            {/* Profile Header */}
-            <div className="profile-header">
-              <div className="profile-avatar">👤</div>
-              <h2 className="profile-name">{userInfo.username || "User"}</h2>
-              <p className="profile-email">{userInfo.email}</p>
-              <div className="profile-stats">
-                <div className="stat">
-                  <span className="stat-number">{userPosts.length}</span>
-                  <span className="stat-label">Posts</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-number">{userInfo.followers?.length || 0}</span>
-                  <span className="stat-label">Followers</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-number">{userInfo.following?.length || 0}</span>
-                  <span className="stat-label">Following</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            {!id && (
-              <div className="profile-actions">
-                <button className="add-post-btn" onClick={() => navigate("/addPost")}>
-                  ➕ Create Post
-                </button>
-                <button className="logout-btn" onClick={handleLogout}>
-                  🚪 Logout
-                </button>
-                <button className="delete-account-btn" onClick={handleDeleteAccount}>
-                  ❌ Delete Account
-                </button>
-              </div>
-            )}
-
-            {/* Posts */}
-            <div className="posts-section">
-              <h3 className="posts-title">{id ? `${userInfo.username}'s Posts` : "My Posts"}</h3>
-
-              {userPosts.length === 0 ? (
-                <div className="no-posts">
-                  <p>No posts yet!</p>
-                  {!id && (
-                    <button className="create-first-post-btn" onClick={() => navigate("/addPost")}>
-                      Create your first post 🎉
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="posts-grid">
-                  {userPosts.map((post) => (
-                    <div key={post._id} className="profile-post-card">
-                      <div className="post-header">
-                        <div className="post-date">
-                          {new Date(post.createdAt).toLocaleDateString()}
-                        </div>
-                        {!id && (
-                          <button
-                            className="delete-post-btn"
-                            onClick={() => handleDeletePost(post._id)}
-                            title="Delete post"
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
-
-                      {post.text && <p className="post-text">{post.text}</p>}
-
-                      {post.image && (
-                        <div className="post-image-container">
-                          <img
-                            src={post.image}
-                            alt="Post content"
-                            className="post-image"
-                            onError={(e) => (e.target.style.display = "none")}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
+
+        {/* Posts */}
+        <div className="phone-content">
+          {loading && <p className="info-text">Loading posts...</p>}
+          {!loading && posts.length === 0 && <p className="no-posts">No posts yet.</p>}
+
+          {posts.map((post) => (
+            <div key={post._id} className="post-card">
+              <div className="post-header">
+                <strong>{user.username || "Anonymous"}</strong>
+                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div className="post-content">
+                {post.text && <p>{post.text}</p>}
+                {post.image && <img src={post.image} alt="Post" className="post-image" />}
+              </div>
+              <Comments postId={post._id} token={token} />
+            </div>
+          ))}
+        </div>
+
         <BottomMenu />
       </div>
     </div>
