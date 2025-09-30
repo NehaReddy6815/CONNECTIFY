@@ -55,14 +55,20 @@ const Home = () => {
     }
   };
 
+  // Helper to get display name
+  const getDisplayName = (user) => {
+    if (!user) return "Anonymous";
+    return user.name || "Anonymous";
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
-      {/* Navbar fixed at top */}
+      {/* Navbar */}
       <div className="sticky top-0 z-10">
         <Navbar />
       </div>
 
-      {/* Main content scrollable */}
+      {/* Main content */}
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6 max-w-2xl mx-auto w-full">
         {/* Loading */}
         {loading && (
@@ -91,56 +97,73 @@ const Home = () => {
         )}
 
         {/* Posts */}
-        {posts.map((post) => (
-          <div key={post._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition duration-200">
-            {/* Post Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-gray-100">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-                {(post.userId?.username || "A")[0].toUpperCase()}
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">{post.userId?.username || "Anonymous"}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                </p>
-              </div>
-            </div>
+        {posts.map((post) => {
+          const displayName = getDisplayName(post.userId);
 
-            {/* Post Content */}
-            <div className="p-4 space-y-3">
-              {post.text && <p className="text-gray-800">{post.text}</p>}
-              {post.image && (
-                <div className="rounded-lg overflow-hidden bg-gray-100">
-                  <img src={post.image} alt="Post" className="w-full object-cover max-h-96 hover:scale-105 transition-transform duration-300"/>
+          return (
+            <div
+              key={post._id}
+              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition duration-200"
+            >
+              {/* Post Header */}
+              <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                  {displayName[0].toUpperCase()}
                 </div>
-              )}
-            </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{displayName}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
 
-            {/* Actions */}
-            <div className="px-4 pb-4 flex items-center gap-3">
-              <button
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  post.likes?.includes(currentUserId)
-                    ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md hover:shadow-lg transform hover:scale-105"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => handleLike(post._id)}
-              >
-                <span>{post.likes?.includes(currentUserId) ? "❤️" : "🤍"}</span>
-                <span>{post.likes?.length || 0}</span>
-              </button>
-              <span className="text-gray-400 text-sm">{post.likes?.length === 1 ? "like" : "likes"}</span>
-            </div>
+              {/* Post Content */}
+              <div className="p-4 space-y-3">
+                {post.text && <p className="text-gray-800">{post.text}</p>}
+                {post.image && (
+                  <div className="rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full object-cover max-h-96 hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+              </div>
 
-            {/* Comments */}
-            <div className="border-t border-gray-100">
-              <Comments post={post} token={token} currentUserId={currentUserId} />
+              {/* Actions */}
+              <div className="px-4 pb-4 flex items-center gap-3">
+                <button
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    post.likes?.includes(currentUserId)
+                      ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  onClick={() => handleLike(post._id)}
+                >
+                  <span>{post.likes?.includes(currentUserId) ? "❤️" : "🤍"}</span>
+                  <span>{post.likes?.length || 0}</span>
+                </button>
+                <span className="text-gray-400 text-sm">
+                  {post.likes?.length === 1 ? "like" : "likes"}
+                </span>
+              </div>
+
+              {/* Comments */}
+              <div className="border-t border-gray-100">
+                <Comments postId={post._id} token={token} currentUserId={currentUserId} />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
 
-      {/* Bottom Menu fixed at bottom */}
+      {/* Bottom Menu */}
       <div className="sticky bottom-0 z-10">
         <BottomMenu />
       </div>

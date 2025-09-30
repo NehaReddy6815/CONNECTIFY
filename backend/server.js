@@ -21,13 +21,12 @@ app.use(cors({
 }));
 
 
-
 // Debug Mongo URI
 console.log("MONGO_URI:", process.env.MONGO_URI);
 
 // Routes
 const postRoutes = require("./routes/postRoutes");
-app.use("/api/posts", postRoutes);
+app.use("/api/posts", postRoutes); // <-- Post routes will now handle comments
 
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
@@ -41,8 +40,8 @@ app.use("/api/users", editProfileRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
-const commentRoutes = require("./routes/commentsRoutes");
-app.use("/api/comments", commentRoutes);
+// const commentRoutes = require("./routes/commentsRoutes");
+// app.use("/api/comments", commentRoutes); // <-- REMOVED: Comment routes are now in postRoutes.js
 
 
 // Error handler (must be after routes)

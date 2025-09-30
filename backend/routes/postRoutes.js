@@ -1,51 +1,68 @@
 const express = require("express");
 const router = express.Router();
-const Post = require("../models/Post");
-const User = require("../models/User");
+const Post = require("../models/post");
+const User = require("../models/user");
 
-// Helper to decode token
+// Decode user ID from token
 const getUserIdFromToken = (token) => {
   if (!token) return null;
   try {
     return JSON.parse(Buffer.from(token.split(".")[1], "base64").toString()).id;
-  } catch {
+  } catch (err) {
+    console.error("Token decoding error:", err.message);
     return null;
   }
 };
 
-// Get posts from people you follow
-router.get("/", async (req, res) => {
+// ---------------------------
+// POST - Create a new post
+// ---------------------------
+router.post("/", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
     const currentUserId = getUserIdFromToken(token);
-    if (!currentUserId) return res.status(401).json({ message: "Unauthorized" });
-
-    const currentUser = await User.findById(currentUserId);
-    if (!currentUser) return res.status(404).json({ message: "User not found" });
-
-    if (!currentUser.following || currentUser.following.length === 0) {
-      return res.json([]);
+    
+    if (!currentUserId) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const posts = await Post.find({ userId: { $in: currentUser.following } })
-      .sort({ createdAt: -1 })
-      .populate("userId", "username profilePicture")
-      .populate("comments.userId", "username profilePicture");
+    const { text, image } = req.body;
 
-    res.json(posts);
+    // Validate: must have text or image
+    if (!text?.trim() && !image) {
+      return res.status(400).json({ message: "Post must have text or image" });
+    }
+
+    // Create new post
+    const newPost = new Post({
+      userId: currentUserId,
+      text: text?.trim() || "",
+      image: image || null,
+      likes: [],
+      comments: []
+    });
+
+    await newPost.save();
+
+    // Populate user info before sending response
+    const populatedPost = await Post.findById(newPost._id)
+      .populate("userId", "name email profilePicture");
+
+    res.status(201).json(populatedPost);
   } catch (err) {
-    console.error(err);
+    console.error("Error creating post:", err);
     res.status(500).json({ error: err.message });
   }
 });
-
-// Get posts by a specific user
+// ---------------------------
+// GET all posts by a user
+// ---------------------------
 router.get("/user/:userId", async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.params.userId })
       .sort({ createdAt: -1 })
-      .populate("userId", "username profilePicture")
-      .populate("comments.userId", "username profilePicture");
+      .populate("userId", "name email profilePicture")
+      .populate("comments.userId", "name email profilePicture");
     res.json(posts);
   } catch (err) {
     console.error(err);
@@ -53,32 +70,27 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-// Like / Unlike a post
-router.put("/:id/like", async (req, res) => {
+// ---------------------------
+// GET all comments for a post
+// ---------------------------
+router.get("/:id/comments", async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    const currentUserId = getUserIdFromToken(token);
-    if (!currentUserId) return res.status(401).json({ message: "Unauthorized" });
-
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate(
+      "comments.userId",
+      "name profilePicture"
+    );
     if (!post) return res.status(404).json({ message: "Post not found" });
-
-    if (post.likes.includes(currentUserId)) {
-      post.likes = post.likes.filter((id) => id.toString() !== currentUserId);
-    } else {
-      post.likes.push(currentUserId);
-    }
-
-    await post.save();
-    res.json(post);
+    res.json(post.comments);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Add comment
-router.post("/:id/comment", async (req, res) => {
+// ---------------------------
+// POST a comment
+// ---------------------------
+router.post("/:id/comments", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
     const currentUserId = getUserIdFromToken(token);
@@ -87,13 +99,55 @@ router.post("/:id/comment", async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    const comment = { userId: currentUserId, text: req.body.text };
+    const text = req.body.text?.trim();
+    if (!text) return res.status(400).json({ message: "Comment text required" });
+
+    const comment = { userId: currentUserId, text };
     post.comments.push(comment);
     await post.save();
 
-    // Populate userId for response
-    const populatedPost = await Post.findById(post._id).populate("comments.userId", "username profilePicture");
-    res.json(populatedPost.comments[populatedPost.comments.length - 1]);
+    // Populate the new comment's user info
+    const populatedPost = await Post.findById(post._id).populate(
+      "comments.userId",
+      "name profilePicture"
+    );
+
+    const newComment = populatedPost.comments[populatedPost.comments.length - 1];
+    res.status(201).json(newComment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------
+// DELETE a comment
+// ---------------------------
+router.delete("/:postId/comments/:commentId", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const currentUserId = getUserIdFromToken(token);
+    if (!currentUserId) return res.status(401).json({ message: "Unauthorized" });
+
+    const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+    const commentUserId = comment.userId ? comment.userId.toString() : null;
+    const postUserId = post.userId ? post.userId.toString() : null;
+
+    // Only comment owner OR post owner can delete
+    if (commentUserId !== currentUserId && postUserId !== currentUserId) {
+      return res.status(403).json({ message: "Cannot delete this comment" });
+    }
+
+    // Remove comment safely, ignore old invalid comments
+    post.comments.pull(comment._id);
+    await post.save({ validateBeforeSave: false });
+
+    res.json({ message: "Comment deleted" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
