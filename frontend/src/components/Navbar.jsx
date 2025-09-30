@@ -13,8 +13,11 @@ const Navbar = () => {
 
         {/* Right: Icons */}
         <div className="flex items-center gap-4 text-xl">
-          <Link to="/messages" className="hover:text-pink-500 transition-colors duration-200">
-            💬
+          <Link
+            to="/messages"
+            className="hover:text-pink-500 transition-colors duration-200"
+          >
+            <i className="bi bi-chat-heart"></i>
           </Link>
         </div>
       </div>

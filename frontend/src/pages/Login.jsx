@@ -44,7 +44,7 @@ const Login = ({ onLogin }) => {
       : {
           email: formData.email,
           password: formData.password,
-          fullName: formData.fullName,
+          name: formData.fullName,
           username: formData.username,
         };
 

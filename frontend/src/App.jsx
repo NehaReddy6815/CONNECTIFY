@@ -6,6 +6,8 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AddPost from "./pages/AddPost";
 import Search from "./pages/Search";
+import Messages from "./pages/Message"; // adjust the path if needed
+
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/EditProfile" element={<EditProfile />} />
         <Route path="/addPost" element={<AddPost />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/messages/:receiverId" element={<Messages />} />
+
       </Routes>
     </Router>
   );
