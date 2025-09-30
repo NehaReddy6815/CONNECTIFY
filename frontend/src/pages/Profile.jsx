@@ -74,6 +74,7 @@ const Profile = () => {
       navigate("/");
     } catch (err) {
       console.error("Error deleting account:", err);
+      alert("Failed to delete account. Please try again.");
     }
   };
 
@@ -86,7 +87,36 @@ const Profile = () => {
       setPosts(posts.filter((p) => p._id !== postId));
     } catch (err) {
       console.error("Error deleting post:", err);
+      alert("Failed to delete post. Please try again.");
     }
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/posts/${postId}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPosts((prev) =>
+        prev.map((post) =>
+          post._id === postId ? { ...post, likes: res.data.likes } : post
+        )
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+    }
+  };
+
+  // Helper function to get post owner ID
+  const getPostOwnerId = (post) => {
+    if (!post.userId) return null;
+    // If userId is an object (populated)
+    if (typeof post.userId === 'object' && post.userId._id) {
+      return post.userId._id;
+    }
+    // If userId is just a string ID
+    return post.userId.toString();
   };
 
   if (loading) {
@@ -119,7 +149,7 @@ const Profile = () => {
         <Navbar />
       </div>
 
-      <div className="flex-1 w-full max-w-3xl mx-auto p-4 flex flex-col gap-6">
+      <div className="flex-1 w-full max-w-3xl mx-auto p-4 pb-24 flex flex-col gap-6">
         {/* Profile Header */}
         <div className="flex flex-col items-center bg-white p-6 rounded-xl shadow-md text-center">
           <div className="w-24 h-24 mb-3 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -175,46 +205,73 @@ const Profile = () => {
           {posts.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No posts yet.</p>
           ) : (
-            posts.map((post) => (
-              <div key={post._id} className="bg-white rounded-xl shadow p-4 flex flex-col gap-3">
-                <div className="flex justify-between items-center text-gray-800">
-                  <div>
-                    <strong>{user.name || "Anonymous"}</strong>
-                    <p className="text-gray-500 text-sm">{user.email || "No email available"}</p>
+            posts.map((post) => {
+              const postOwnerId = getPostOwnerId(post);
+              const isOwnPost = postOwnerId === currentUserId;
+
+              return (
+                <div key={post._id} className="bg-white rounded-xl shadow p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center text-gray-800">
+                    <div>
+                      <strong>{user.name || "Anonymous"}</strong>
+                      <p className="text-gray-500 text-sm">{user.email || "No email available"}</p>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
 
-                {post.text && <p className="text-gray-700">{post.text}</p>}
-                {post.image && (
-                  <img
-                    src={post.image}
-                    alt="Post"
-                    className="w-full max-h-96 object-cover rounded-lg"
+                  {post.text && <p className="text-gray-700">{post.text}</p>}
+                  {post.image && (
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full max-h-96 object-cover rounded-lg"
+                    />
+                  )}
+
+                  {/* Likes Section */}
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                    <button
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                        post.likes?.includes(currentUserId)
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                      onClick={() => handleLike(post._id)}
+                    >
+                      <span>{post.likes?.includes(currentUserId) ? "❤️" : "🤍"}</span>
+                      <span>{post.likes?.length || 0}</span>
+                    </button>
+                    <span className="text-gray-500 text-sm">
+                      {post.likes?.length === 1 ? "like" : "likes"}
+                    </span>
+                    <span className="text-gray-400 text-sm">•</span>
+                    <span className="text-gray-500 text-sm">
+                      {post.comments?.length || 0} {post.comments?.length === 1 ? "comment" : "comments"}
+                    </span>
+                  </div>
+
+                  {/* Delete Post Button - Only show for own posts */}
+                  {isOwnPost && (
+                    <button
+                      className="px-3 py-1 bg-red-500 text-white rounded-full text-sm self-end hover:bg-red-600 transition"
+                      onClick={() => handleDeletePost(post._id)}
+                    >
+                      🗑️ Delete Post
+                    </button>
+                  )}
+
+                  {/* Comments Component */}
+                  <Comments
+                    postId={post._id}
+                    token={token}
+                    currentUserId={currentUserId}
+                    postOwnerId={postOwnerId}
                   />
-                )}
-
-                {/* Delete Post Button */}
-                {post.userId._id === currentUserId && (
-                  <button
-                    className="px-3 py-1 bg-red-500 text-white rounded-full text-sm self-end hover:bg-red-600"
-                    onClick={() => handleDeletePost(post._id)}
-                  >
-                    Delete Post
-                  </button>
-                )}
-
-                {/* Comments Component */}
-                <Comments
-                  postId={post._id}
-                  token={token}
-                  currentUserId={currentUserId}
-                  postOwnerId={post.userId._id} // post owner ID
-                />
-              </div>
-            ))
+                </div>
+              );
+            })
           )}
         </div>
       </div>

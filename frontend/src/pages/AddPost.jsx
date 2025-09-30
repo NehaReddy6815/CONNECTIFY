@@ -134,14 +134,7 @@ const AddPost = () => {
           </div>
         )}
 
-        {/* Debug info - Remove this after testing */}
-        <div className="mb-4 p-2 bg-blue-50 border border-blue-300 rounded text-xs">
-          <p>Image selected: {selectedImage ? "Yes ✓" : "No ✗"}</p>
-          <p>Text length: {text.length}</p>
-          <p>Button disabled: {(uploading || (!text.trim() && !selectedImage)) ? "Yes" : "No"}</p>
-          <p className="font-bold text-red-600">👇 SCROLL DOWN - POST BUTTON SHOULD BE BELOW 👇</p>
-        </div>
-
+  
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
           {/* Textarea */}
           <textarea
@@ -188,14 +181,14 @@ const AddPost = () => {
           )}
 
           {/* Buttons */}
-          <div className="flex gap-3 mt-3 bg-yellow-200 border-4 border-red-500 p-4">
-            <p className="w-full text-center text-red-600 font-bold mb-2">🚨 BUTTONS SECTION - IF YOU SEE THIS YELLOW BOX, BUTTONS ARE HERE 🚨</p>
+          <div className="flex gap-3 mt-3 bg-pink-200 border-4 border-purple-500 p-4">
+          
             <button
               type="submit"
               disabled={uploading || (!text.trim() && !selectedImage)}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full shadow-lg border-2 border-pink-600 hover:from-pink-600 hover:to-purple-600 hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full shadow-lg border-2 border-pink-600 hover:from-pink-600 hover:to-purple-600 hover:scale-105 disabled:from-purple-400 disabled:to-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all"
             >
-              {uploading ? "⏳ Posting..." : "✨ Post"}
+              {uploading ? "⏳ Posting..." : "Post"}
             </button>
 
             <button

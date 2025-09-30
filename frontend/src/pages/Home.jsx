@@ -68,8 +68,8 @@ const Home = () => {
         <Navbar />
       </div>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6 max-w-2xl mx-auto w-full">
+      {/* Main content - Added pb-24 for bottom padding */}
+      <main className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-6 max-w-2xl mx-auto w-full">
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center py-20">
@@ -154,9 +154,14 @@ const Home = () => {
                 </span>
               </div>
 
-              {/* Comments */}
+              {/* Comments - Added postOwnerId prop */}
               <div className="border-t border-gray-100">
-                <Comments postId={post._id} token={token} currentUserId={currentUserId} />
+                <Comments 
+                  postId={post._id} 
+                  token={token} 
+                  currentUserId={currentUserId}
+                  postOwnerId={post.userId?._id || post.userId}
+                />
               </div>
             </div>
           );

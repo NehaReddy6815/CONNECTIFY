@@ -54,6 +54,80 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// ---------------------------
+// GET posts from following (Feed) - ONLY following, not own posts
+// ---------------------------
+router.get("/", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const currentUserId = getUserIdFromToken(token);
+    
+    if (!currentUserId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findById(currentUserId);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ONLY fetch posts from users you're following (NOT your own posts)
+    const posts = await Post.find({
+      userId: { $in: user.following || [] }  // Removed currentUserId
+    })
+      .populate("userId", "name email profilePicture")
+      .populate("comments.userId", "name email profilePicture")
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching feed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------
+// PUT - Like/Unlike a post
+// ---------------------------
+router.put("/:id/like", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const currentUserId = getUserIdFromToken(token);
+    
+    if (!currentUserId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Check if user already liked the post
+    const likeIndex = post.likes.indexOf(currentUserId);
+    
+    if (likeIndex === -1) {
+      // Like the post
+      post.likes.push(currentUserId);
+    } else {
+      // Unlike the post
+      post.likes.splice(likeIndex, 1);
+    }
+
+    await post.save();
+    
+    res.json({ likes: post.likes });
+  } catch (err) {
+    console.error("Error liking post:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ---------------------------
 // GET all posts by a user
 // ---------------------------
@@ -150,6 +224,39 @@ router.delete("/:postId/comments/:commentId", async (req, res) => {
     res.json({ message: "Comment deleted" });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------
+// DELETE a post
+// ---------------------------
+router.delete("/:postId", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const currentUserId = getUserIdFromToken(token);
+    
+    if (!currentUserId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const post = await Post.findById(req.params.postId);
+    
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Check if current user is the post owner
+    const postUserId = post.userId ? post.userId.toString() : null;
+    if (postUserId !== currentUserId) {
+      return res.status(403).json({ message: "You can only delete your own posts" });
+    }
+
+    await Post.findByIdAndDelete(req.params.postId);
+    
+    res.json({ message: "Post deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting post:", err);
     res.status(500).json({ error: err.message });
   }
 });
