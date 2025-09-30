@@ -1,190 +1,169 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import io from "socket.io-client";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 
 const socket = io("http://localhost:5000");
 
 const Messages = () => {
-  const { receiverId } = useParams();
-  const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [users, setUsers] = useState([]);
+  const [activeChatUser, setActiveChatUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [error, setError] = useState(null);
 
-  const Messages = () => {
-  return <div>Messages Page</div>;
-};
+  const token = localStorage.getItem("token");
+  const messagesEndRef = useRef(null);
 
-  // Get current user ID from token
   useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setCurrentUserId(payload.id);
-      } catch (err) {
-        console.error("Invalid token:", err);
-      }
+    if (!token) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(atob(token.split(".")[1]));
+      setCurrentUserId(payload.id);
+    } catch (err) {
+      setError("Invalid token. Please login again.");
+      return;
     }
-  }, [token]);
 
-  // Fetch list of users for inbox
-  useEffect(() => {
     const fetchUsers = async () => {
+      setLoadingUsers(true);
       try {
         const res = await axios.get("http://localhost:5000/api/users", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUsers(res.data.filter((u) => u._id !== currentUserId)); // exclude self
+        setUsers(res.data);
       } catch (err) {
-        console.error("Failed to fetch users:", err);
+        console.error("Axios error:", err.response || err.message);
+        setError("Failed to load users. Please try again later.");
+      } finally {
+        setLoadingUsers(false);
       }
     };
-    if (currentUserId) fetchUsers();
-  }, [currentUserId, token]);
+    fetchUsers();
 
-  // If receiverId exists, fetch chat history and join room
-  useEffect(() => {
-    if (!currentUserId || !receiverId) return;
-
-    const room = [currentUserId, receiverId].sort().join("_");
-    socket.emit("joinRoom", room);
-
-    socket.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+    // Listen for incoming messages
+    socket.on("receiveMessage", (data) => {
+      if (activeChatUser && data.senderId === activeChatUser._id) {
+        setMessages(prev => [...prev, data]);
+      }
     });
 
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/messages/${currentUserId}/${receiverId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setMessages(res.data);
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
-      }
-    };
-
-    fetchMessages();
-
     return () => socket.off("receiveMessage");
-  }, [currentUserId, receiverId, token]);
+  }, [token, activeChatUser]);
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !currentUserId || !receiverId) return;
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const room = [currentUserId, receiverId].sort().join("_");
-    const messageData = {
-      text: newMessage,
-      sender: currentUserId,
-      receiver: receiverId,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-
-    socket.emit("sendMessage", { room, message: messageData });
+  const handleSelectUser = async (user) => {
+    setActiveChatUser(user);
+    setMessages([]);
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/messages",
-        { receiverId, text: newMessage },
+      const res = await axios.get(
+        `http://localhost:5000/api/messages/${user._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      setMessages(res.data);
     } catch (err) {
-      console.error("Failed to save message:", err);
+      console.error(err);
+      setError("Failed to load chat messages.");
     }
+  };
 
-    setMessages((prev) => [...prev, messageData]);
+  const handleSendMessage = () => {
+    if (!newMessage || !activeChatUser) return;
+
+    const messageData = {
+      senderId: currentUserId,
+      receiverId: activeChatUser._id,
+      text: newMessage,
+      createdAt: new Date(),
+    };
+
+    socket.emit("sendMessage", messageData);
+    setMessages(prev => [...prev, messageData]);
     setNewMessage("");
   };
 
-  // If no receiver selected → show inbox
-  if (!receiverId) {
-    return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
-        <Navbar />
-        <div className="flex-1 w-full max-w-3xl mx-auto p-4 flex flex-col gap-3">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">Inbox</h2>
-          {users.length === 0 ? (
-            <p className="text-gray-500">No users available.</p>
-          ) : (
-            users.map((user) => (
-              <Link
-                key={user._id}
-                to={`/messages/${user._id}`}
-                className="flex items-center gap-3 p-3 bg-white rounded-xl shadow hover:bg-gray-50 transition"
-              >
-                <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                  {user.profilePicture ? (
-                    <img
-                      src={user.profilePicture}
-                      alt="avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xl">👤</span>
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-800">{user.name}</p>
-                  <p className="text-gray-500 text-sm">{user.email}</p>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
-        <BottomMenu />
-      </div>
-    );
-  }
-
-  // Otherwise → show chat with selected user
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
       <Navbar />
-      <div className="flex-1 w-full max-w-3xl mx-auto p-4 pb-24 flex flex-col gap-4">
-        <div className="flex-1 overflow-y-auto space-y-3 bg-white rounded-xl shadow-md p-4">
-          {messages.length === 0 ? (
-            <p className="text-gray-500 text-center">No messages yet. Say hi! 💬</p>
-          ) : (
-            messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`p-3 rounded-xl max-w-xs ${
-                  msg.sender === currentUserId
-                    ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white ml-auto shadow"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                <p className="text-sm">{msg.text}</p>
-                <span className="block text-xs mt-1 opacity-70">{msg.time}</span>
-              </div>
-            ))
+
+      <div className="flex-1 flex flex-col lg:flex-row max-w-5xl mx-auto gap-4 p-4 pb-24">
+        {/* Users list / Inbox */}
+        <div className="w-full lg:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col gap-2">
+          <h2 className="text-xl font-bold mb-2">Inbox</h2>
+
+          {loadingUsers && <p className="text-gray-500">Loading users...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loadingUsers && !error && users.length === 0 && (
+            <p className="text-gray-500">No users available.</p>
           )}
+
+          {!loadingUsers && !error && users.map(user => (
+            <button
+              key={user._id}
+              onClick={() => handleSelectUser(user)}
+              className={`text-left p-2 rounded hover:bg-gray-100 transition ${
+                activeChatUser?._id === user._id ? "bg-gray-200" : ""
+              }`}
+            >
+              {user.name || "Anonymous"} ({user.username})
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center bg-white shadow-md rounded-full px-3 py-2">
-          <input
-            type="text"
-            placeholder="Type a message..."
-            className="flex-1 px-3 py-2 text-sm outline-none bg-transparent"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          />
-          <button
-            onClick={sendMessage}
-            className="ml-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full font-semibold shadow hover:from-pink-600 hover:to-purple-600 transition"
-          >
-            Send
-          </button>
-        </div>
+        {/* Chat Window */}
+        {activeChatUser && (
+          <div className="w-full lg:w-2/3 bg-white rounded-xl shadow flex flex-col">
+            <div className="p-4 border-b border-gray-200 font-bold text-gray-700">
+              Chat with {activeChatUser.name || "Anonymous"}
+            </div>
+
+            <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-2">
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`max-w-xs px-3 py-2 rounded-xl ${
+                    msg.senderId === currentUserId
+                      ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white self-end"
+                      : "bg-gray-100 text-gray-800 self-start"
+                  }`}
+                >
+                  {msg.text}
+                  <div className="text-xs text-gray-400 mt-1 text-right">
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef}></div>
+            </div>
+
+            <div className="p-4 border-t border-gray-200 flex gap-2">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
       <BottomMenu />
     </div>
   );

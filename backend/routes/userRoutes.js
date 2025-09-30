@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const Post = require('../models/Post');
+const User = require('../models/user');
+const Post = require('../models/post');
+
+
+const authMiddleware = require("../middleware/authMiddleware");
+
+// GET all users (for Inbox), excluding current user
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user.id } }).select("-password");
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
 
 // ----------------------
 // GET user by ID
