@@ -7,12 +7,12 @@ import BottomMenu from "../components/BottomMenu";
 const socket = io("http://localhost:5000");
 
 const Messages = () => {
-  const [users, setUsers] = useState([]);
+  const [followedUsers, setFollowedUsers] = useState([]);
+  const [notFollowedUsers, setNotFollowedUsers] = useState([]);
   const [activeChatUser, setActiveChatUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [loadingUsers, setLoadingUsers] = useState(true);
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -21,32 +21,27 @@ const Messages = () => {
   useEffect(() => {
     if (!token) return;
 
-    let payload;
     try {
-      payload = JSON.parse(atob(token.split(".")[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       setCurrentUserId(payload.id);
-    } catch (err) {
-      setError("Invalid token. Please login again.");
-      return;
+    } catch {
+      setError("Invalid token");
     }
 
     const fetchUsers = async () => {
-      setLoadingUsers(true);
       try {
         const res = await axios.get("http://localhost:5000/api/users", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUsers(res.data);
+        setFollowedUsers(res.data.followed);
+        setNotFollowedUsers(res.data.notFollowed);
       } catch (err) {
-        console.error("Axios error:", err.response || err.message);
-        setError("Failed to load users. Please try again later.");
-      } finally {
-        setLoadingUsers(false);
+        console.error(err);
+        setError("Failed to load users");
       }
     };
     fetchUsers();
 
-    // Listen for incoming messages
     socket.on("receiveMessage", (data) => {
       if (activeChatUser && data.senderId === activeChatUser._id) {
         setMessages(prev => [...prev, data]);
@@ -72,7 +67,7 @@ const Messages = () => {
       setMessages(res.data);
     } catch (err) {
       console.error(err);
-      setError("Failed to load chat messages.");
+      setError("Failed to load chat messages");
     }
   };
 
@@ -96,34 +91,52 @@ const Messages = () => {
       <Navbar />
 
       <div className="flex-1 flex flex-col lg:flex-row max-w-5xl mx-auto gap-4 p-4 pb-24">
-        {/* Users list / Inbox */}
+        {/* Inbox */}
         <div className="w-full lg:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col gap-2">
           <h2 className="text-xl font-bold mb-2">Inbox</h2>
 
-          {loadingUsers && <p className="text-gray-500">Loading users...</p>}
           {error && <p className="text-red-500">{error}</p>}
-          {!loadingUsers && !error && users.length === 0 && (
-            <p className="text-gray-500">No users available.</p>
+
+          {followedUsers.length > 0 && (
+            <>
+              <h3 className="font-semibold text-gray-600">Followed</h3>
+              {followedUsers.map(u => (
+                <button
+                  key={u._id}
+                  onClick={() => handleSelectUser(u)}
+                  className={`text-left p-2 rounded hover:bg-gray-100 transition ${activeChatUser?._id === u._id ? "bg-gray-200" : ""}`}
+                >
+                  {u.name} ({u.username})
+                </button>
+              ))}
+            </>
           )}
 
-          {!loadingUsers && !error && users.map(user => (
-            <button
-              key={user._id}
-              onClick={() => handleSelectUser(user)}
-              className={`text-left p-2 rounded hover:bg-gray-100 transition ${
-                activeChatUser?._id === user._id ? "bg-gray-200" : ""
-              }`}
-            >
-              {user.name || "Anonymous"} ({user.username})
-            </button>
-          ))}
+          {notFollowedUsers.length > 0 && (
+            <>
+              <h3 className="font-semibold text-gray-600 mt-2">Others</h3>
+              {notFollowedUsers.map(u => (
+                <button
+                  key={u._id}
+                  onClick={() => handleSelectUser(u)}
+                  className={`text-left p-2 rounded hover:bg-gray-100 transition ${activeChatUser?._id === u._id ? "bg-gray-200" : ""}`}
+                >
+                  {u.name} ({u.username})
+                </button>
+              ))}
+            </>
+          )}
+
+          {followedUsers.length === 0 && notFollowedUsers.length === 0 && !error && (
+            <p className="text-gray-500">No users available.</p>
+          )}
         </div>
 
-        {/* Chat Window */}
+        {/* Chat window */}
         {activeChatUser && (
           <div className="w-full lg:w-2/3 bg-white rounded-xl shadow flex flex-col">
             <div className="p-4 border-b border-gray-200 font-bold text-gray-700">
-              Chat with {activeChatUser.name || "Anonymous"}
+              Chat with {activeChatUser.name}
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-2">

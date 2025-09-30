@@ -6,17 +6,28 @@ const Post = require('../models/post');
 
 const authMiddleware = require("../middleware/authMiddleware");
 
-// GET all users (for Inbox), excluding current user
+
+// GET all users except current, separating followed vs not-followed
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: req.user.id } }).select("-password");
-    res.json(users);
+    const currentUser = await User.findById(req.user.id);
+
+    const allUsers = await User.find({ _id: { $ne: req.user.id } }).select("-password");
+
+    const followed = [];
+    const notFollowed = [];
+
+    allUsers.forEach(u => {
+      if (currentUser.following.includes(u._id)) followed.push(u);
+      else notFollowed.push(u);
+    });
+
+    res.json({ followed, notFollowed });
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
-
 // ----------------------
 // GET user by ID
 // ----------------------
