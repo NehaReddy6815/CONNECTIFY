@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,9 +16,7 @@ const Login = ({ onLogin }) => {
 
   const formTitle = isLogin ? "Log In" : "Sign Up";
   const primaryButtonText = isLogin ? "Log in" : "Sign up";
-  const switchMessage = isLogin
-    ? "Don't have an account?"
-    : "Have an account?";
+  const switchMessage = isLogin ? "Don't have an account?" : "Have an account?";
   const switchActionText = isLogin ? "Sign up" : "Log in";
 
   const handleInputChange = (e) => {
@@ -87,7 +85,7 @@ const Login = ({ onLogin }) => {
             {/* Phone screen */}
             <div className="flex-1 w-[320px] bg-gray-50 rounded-3xl shadow-inner flex items-center justify-center">
               <span className="text-gray-300 font-semibold text-lg">
-                Your Preview
+                Heylo
               </span>
             </div>
           </div>
@@ -102,7 +100,7 @@ const Login = ({ onLogin }) => {
               </h1>
               {!isLogin && (
                 <p className="text-gray-500 font-medium text-sm mt-3">
-                  Sign up to see photos and videos from your friends.
+                  Create an account here to start using our Connectify!
                 </p>
               )}
             </div>
@@ -157,11 +155,12 @@ const Login = ({ onLogin }) => {
 
               {!isLogin && (
                 <p className="text-center text-[11px] text-gray-500 mt-4 px-2 leading-5">
-                  People who use our service may have uploaded your contact
-                  information to Connectify. Learn More.
+                  People who use our service may have uploaded your contact information to Connectify.{" "}
+                  <Link to="/policies" className="text-blue-500 underline hover:text-blue-700">
+                    Learn More
+                  </Link>.
                   <br />
-                  By signing up, you agree to our Terms, Privacy Policy and
-                  Cookies Policy.
+                  By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
                 </p>
               )}
 

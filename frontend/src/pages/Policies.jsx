@@ -1,96 +1,63 @@
 import React from "react";
-import Navbar from "../components/Navbar";
-import BottomMenu from "../components/BottomMenu";
+import { useNavigate } from "react-router-dom";
 
 const Policies = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
-      {/* Navbar */}
-      <div className="sticky top-0 z-10">
-        <Navbar />
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-50 px-4 py-10">
+      <div className="max-w-4xl w-full mx-auto bg-white border border-gray-300 rounded-lg shadow p-6 sm:p-10 space-y-6">
+        <h1 className="text-3xl font-semibold text-gray-800">Policies</h1>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto px-4 py-8 max-w-3xl w-full mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-            Legal Information
-          </h1>
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold text-gray-700">Terms of Service</h2>
+          <p className="text-gray-600 text-sm">
+By using Connectify, you agree to abide by our terms, which include rules about account usage, prohibited content, and privacy protections.
 
-          {/* Terms of Service */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-pink-500 mb-3">
-              Terms of Service
-            </h2>
-            <p className="text-gray-700 text-sm leading-6">
-              Welcome to Connectify. By accessing or using our service, you agree
-              to be bound by these Terms of Service.
-              <br />
-              <br />
-              Use of our platform is at your own risk. You must be at least 13
-              years old to use Connectify.
-              <br />
-              <br />
-              We may modify these terms at any time. Continued use of the
-              platform constitutes acceptance of the updated terms.
-            </p>
-          </section>
+Account Responsibilities: Users must provide accurate information during registration and are responsible for maintaining the confidentiality of their login credentials.
 
-          {/* Privacy Policy */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-pink-500 mb-3">
-              Privacy Policy
-            </h2>
-            <p className="text-gray-700 text-sm leading-6">
-              Connectify is committed to protecting your privacy. We collect
-              personal information such as your name, email, and profile details
-              for account creation and improving user experience.
-              <br />
-              <br />
-              We will never sell your personal information. Data may be shared
-              with third-party services only as required for functionality or
-              legal obligations.
-              <br />
-              <br />
-              You can request to view, update, or delete your personal data at
-              any time.
-            </p>
-          </section>
+Prohibited Content: You may not post content that is illegal, offensive, discriminatory, or infringes on someone else's intellectual property.
 
-          {/* Cookies Policy */}
-          <section>
-            <h2 className="text-2xl font-semibold text-pink-500 mb-3">
-              Cookies Policy
-            </h2>
-            <p className="text-gray-700 text-sm leading-6">
-              Connectify uses cookies to enhance your experience, remember
-              preferences, and analyze site traffic.
-              <br />
-              <br />
-              Cookies are small files stored on your device. You can disable
-              cookies in your browser settings, but some functionality may be
-              affected.
-              <br />
-              <br />
-              By continuing to use our website, you consent to the use of
-              cookies as described.
-            </p>
-          </section>
+Community Guidelines: Harassment, spamming, or misleading others is strictly forbidden. Violations may result in account suspension or termination.
 
-          <div className="text-center mt-8">
-            <a
-              href="/"
-              className="inline-block bg-pink-500 text-white px-6 py-2 rounded-md hover:bg-pink-600 transition-colors text-sm"
-            >
-              Back to Home
-            </a>
-          </div>
-        </div>
-      </main>
+Termination of Service: Connectify reserves the right to suspend or terminate accounts at its discretion for violations of these terms.
 
-      {/* Bottom Menu */}
-      <div className="sticky bottom-0 z-10">
-        <BottomMenu />
+
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold text-gray-700">Privacy Policy</h2>
+          <p className="text-gray-600 text-sm">
+           
+We value your privacy and are committed to protecting your personal information.
+
+Data Collection: We collect information you provide directly (e.g., name, email, username) and data generated through your activity (e.g., posts, likes).
+
+Usage of Data: Your data is used to personalize your experience, improve the platform, and communicate important updates.
+
+Sharing of Data: Your personal information will not be sold or shared with third parties without consent, except where required by law.
+
+Data Security: We employ encryption and other security measures to protect your data.
+           
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h3 className="text-xl font-semibold text-gray-700">Disclaimer</h3>
+          <p className="text-gray-600 text-sm">
+          
+By continuing to use Connectify, you accept these policies. We may update these policies from time to time, and users will be notified of any significant changes.
+          
+          </p>
+        </section>
+
+        <button
+          onClick={() => navigate("/")}
+          className="mt-6 bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition-colors duration-200"
+        >
+          Back to Login
+        </button>
       </div>
     </div>
   );
