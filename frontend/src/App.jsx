@@ -6,7 +6,8 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import AddPost from "./pages/AddPost";
 import Search from "./pages/Search";
-import Messages from "./pages/Messages"; // adjust the path if needed
+import Messages from "./pages/Messages"; 
+import Policies from "./pages/Policies";// adjust the path if needed
 
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
         <Route path="/search" element={<Search />} />
          <Route path="/messages" element={<Messages />} />             {/* inbox */}
         <Route path="/messages/:receiverId" element={<Messages />} /> {/* chat */}
-
+         <Route path="/policies" element={<Policies />} />
       </Routes>
     </Router>
   );

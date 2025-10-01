@@ -6,15 +6,14 @@ const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    fullName: "", // Added for registration
-    username: "", // Added for registration
+    fullName: "",
+    username: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
-  // Determine the current form details based on the mode
   const formTitle = isLogin ? "Log In" : "Sign Up";
   const primaryButtonText = isLogin ? "Log in" : "Sign up";
   const switchMessage = isLogin
@@ -32,13 +31,11 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError("");
 
-    // Call backend directly to avoid proxy issues
     const baseURL = "http://localhost:5000";
     const endpoint = isLogin
       ? `${baseURL}/api/auth/login`
-      : `${baseURL}/api/auth/register`; // Ensure this endpoint exists for registration
+      : `${baseURL}/api/auth/register`;
 
-    // Only include necessary data for login or registration
     const dataToSend = isLogin
       ? { email: formData.email, password: formData.password }
       : {
@@ -58,9 +55,7 @@ const Login = ({ onLogin }) => {
       let data = {};
       try {
         data = await response.json();
-      } catch (_) {
-        // ignore JSON parse errors and let status handling show a message
-      }
+      } catch (_) {}
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
@@ -78,23 +73,29 @@ const Login = ({ onLogin }) => {
   const switchMode = () => {
     setIsLogin(!isLogin);
     setError("");
-    setFormData({ email: "", password: "", fullName: "", username: "" }); // Clear all form data on mode switch
+    setFormData({ email: "", password: "", fullName: "", username: "" });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* Left preview panel (hidden on small screens) */}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
+      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Left panel (desktop only) */}
         <div className="hidden lg:flex justify-center">
-          <div className="relative w-[380px] h-[580px] rounded-[40px] border-8 border-gray-900 bg-black overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/40 via-pink-600/40 to-yellow-500/40 mix-blend-screen" />
-            <div className="absolute inset-6 rounded-2xl bg-cover bg-center" style={{ backgroundImage: "url('/vite.svg')" }} />
+          <div className="relative w-[380px] h-[580px] rounded-[40px] border-8 border-pink-500 bg-white shadow-2xl flex flex-col items-center pt-6">
+            {/* Heart at top */}
+            <div className="text-pink-500 text-3xl mb-4 animate-pulse">❤️</div>
+            {/* Phone screen */}
+            <div className="flex-1 w-[320px] bg-gray-50 rounded-3xl shadow-inner flex items-center justify-center">
+              <span className="text-gray-300 font-semibold text-lg">
+                Your Preview
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Right: Auth card */}
+        {/* Right panel: Auth form */}
         <div className="w-full flex flex-col items-center">
-          <div className="bg-white border border-gray-300 rounded-sm px-10 pt-10 pb-6 w-full max-w-[350px]">
+          <div className="bg-white border border-gray-300 rounded-sm px-8 sm:px-10 pt-10 pb-6 w-full max-w-[380px]">
             <div className="text-center mb-6">
               <h1 className="text-4xl font-serif font-thin text-gray-800 tracking-wide">
                 Connectify
@@ -156,9 +157,11 @@ const Login = ({ onLogin }) => {
 
               {!isLogin && (
                 <p className="text-center text-[11px] text-gray-500 mt-4 px-2 leading-5">
-                  People who use our service may have uploaded your contact information to Connectify. Learn More.
+                  People who use our service may have uploaded your contact
+                  information to Connectify. Learn More.
                   <br />
-                  By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
+                  By signing up, you agree to our Terms, Privacy Policy and
+                  Cookies Policy.
                 </p>
               )}
 
@@ -166,8 +169,13 @@ const Login = ({ onLogin }) => {
                 type="submit"
                 disabled={
                   loading ||
-                  (isLogin && (!formData.email || !formData.password)) ||
-                  (!isLogin && (!formData.email || !formData.password || !formData.fullName || !formData.username))
+                  (isLogin &&
+                    (!formData.email || !formData.password)) ||
+                  (!isLogin &&
+                    (!formData.email ||
+                      !formData.password ||
+                      !formData.fullName ||
+                      !formData.username))
                 }
                 className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white font-semibold py-2 rounded-md text-sm mt-4 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -177,7 +185,10 @@ const Login = ({ onLogin }) => {
 
             {isLogin && (
               <div className="text-center mt-4">
-                <button type="button" className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                <button
+                  type="button"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
                   Forgot password?
                 </button>
               </div>
@@ -190,9 +201,12 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
-          <div className="bg-white border border-gray-300 rounded-sm p-4 text-center text-sm w-full max-w-[350px] mt-2">
+          <div className="bg-white border border-gray-300 rounded-sm p-4 text-center text-sm w-full max-w-[380px] mt-2">
             <span>{switchMessage} </span>
-            <button onClick={switchMode} className="text-blue-500 font-semibold hover:text-blue-700">
+            <button
+              onClick={switchMode}
+              className="text-blue-500 font-semibold hover:text-blue-700"
+            >
               {switchActionText}
             </button>
           </div>
