@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// Enable CORS for frontend (any localhost port during dev)
+// Enable CORS for frontend
 app.use(
   cors({
     origin: "http://localhost:5173", // frontend URL
@@ -22,9 +22,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// Debug Mongo URI
-console.log("MONGO_URI:", process.env.MONGO_URI);
 
 // Routes
 const postRoutes = require("./routes/postRoutes");
@@ -49,12 +46,6 @@ app.use("/api/messages", messageRoutes);
 const errorMiddleware = require("./middleware/errorMiddleware");
 app.use(errorMiddleware);
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected successfully"))
-  .catch((err) => console.log("❌ MongoDB connection error:", err));
-
 // Test route
 app.get("/", (req, res) => {
   res.send("Connectify backend is running!");
@@ -62,7 +53,7 @@ app.get("/", (req, res) => {
 
 // ---- SOCKET.IO SETUP ----
 
-// Create HTTP server instead of app.listen
+// Create HTTP server
 const server = http.createServer(app);
 
 // Attach socket.io to server
@@ -70,31 +61,23 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("⚡ User connected:", socket.id);
+// Import and setup message socket handlers
+const setupMessageSocket = require("./socket/messageSocket");
+setupMessageSocket(io);
 
-  // Join a private room
-  socket.on("joinRoom", (room) => {
-    socket.join(room);
-    console.log(`User ${socket.id} joined room ${room}`);
-  });
-
-  // Send message in room
-  socket.on("sendMessage", ({ room, message }) => {
-    io.to(room).emit("receiveMessage", message);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
-  });
-});
-
-
-// ---- START SERVER ----
+// ---- MONGODB CONNECTION & SERVER START ----
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () =>
-  console.log(`🚀 Server with WebSockets running on port ${PORT}`)
-);
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected successfully");
+    server.listen(PORT, () => {
+      console.log(`🚀 Server with WebSockets running on port ${PORT}`);
+    });
+  })
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
