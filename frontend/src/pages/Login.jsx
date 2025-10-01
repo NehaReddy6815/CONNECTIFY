@@ -28,8 +28,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    const baseURL = "http://localhost:5000";
+    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
     const endpoint = isLogin
       ? `${baseURL}/api/auth/login`
       : `${baseURL}/api/auth/register`;
