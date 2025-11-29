@@ -2,20 +2,23 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const Comments = ({ postId, token, currentUserId, postOwnerId }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // ---------------------------
-  // Fetch comments for this post
+  // Fetch comments for the post
   // ---------------------------
   const fetchComments = async () => {
     setLoading(true);
     setError(null);
+
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/posts/${postId}/comments`,
+        `${API_URL}/api/posts/${postId}/comments`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setComments(res.data);
@@ -36,14 +39,17 @@ const Comments = ({ postId, token, currentUserId, postOwnerId }) => {
   // ---------------------------
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
+
     setLoading(true);
     setError(null);
+
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/posts/${postId}/comments`,
+        `${API_URL}/api/posts/${postId}/comments`,
         { text: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setComments((prev) => [...prev, res.data]);
       setNewComment("");
     } catch (err) {
@@ -60,11 +66,13 @@ const Comments = ({ postId, token, currentUserId, postOwnerId }) => {
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Delete this comment?")) return;
     setError(null);
+
     try {
       await axios.delete(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+        `${API_URL}/api/posts/${postId}/comments/${commentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setComments((prev) => prev.filter((c) => c._id !== commentId));
     } catch (err) {
       console.error(err);
@@ -79,6 +87,7 @@ const Comments = ({ postId, token, currentUserId, postOwnerId }) => {
       {loading && <p className="text-blue-500">Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
+      {/* Comments List */}
       <div className="space-y-2 max-h-60 overflow-y-auto">
         {comments.length === 0 && !loading && (
           <p className="text-gray-500 text-sm">No comments yet. Be the first!</p>
@@ -97,7 +106,7 @@ const Comments = ({ postId, token, currentUserId, postOwnerId }) => {
               </p>
             </div>
 
-            {/* Delete button visible to comment owner or post owner */}
+            {/* Delete button — only for commenter or post owner */}
             {(c.userId?._id === currentUserId || postOwnerId === currentUserId) && (
               <button
                 className="text-red-500 text-sm hover:underline"

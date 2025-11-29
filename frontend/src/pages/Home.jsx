@@ -11,6 +11,8 @@ const Home = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL; // ✅ Backend URL
+
   const token = localStorage.getItem("token");
   const currentUserId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
 
@@ -23,7 +25,7 @@ const Home = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/api/posts", {
+        const res = await axios.get(`${API_URL}/api/posts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPosts(res.data);
@@ -36,15 +38,16 @@ const Home = () => {
     };
 
     fetchPosts();
-  }, [token, navigate]);
+  }, [token, navigate, API_URL]);
 
   const handleLike = async (postId) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${API_URL}/api/posts/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setPosts((prev) =>
         prev.map((post) =>
           post._id === postId ? { ...post, likes: res.data.likes } : post
@@ -55,7 +58,6 @@ const Home = () => {
     }
   };
 
-  // Helper to get display name
   const getDisplayName = (user) => {
     if (!user) return "Anonymous";
     return user.name || "Anonymous";
@@ -68,7 +70,7 @@ const Home = () => {
         <Navbar />
       </div>
 
-      {/* Main content - Added pb-24 for bottom padding */}
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-6 max-w-2xl mx-auto w-full">
         {/* Loading */}
         {loading && (
@@ -89,14 +91,16 @@ const Home = () => {
         {!loading && posts.length === 0 && (
           <div className="flex flex-col items-center py-20">
             <div className="text-6xl mb-3">📭</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No posts yet</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No posts yet
+            </h3>
             <p className="text-gray-500 text-center max-w-xs">
               Start following people to see their posts here!
             </p>
           </div>
         )}
 
-        {/* Posts */}
+        {/* Posts List */}
         {posts.map((post) => {
           const displayName = getDisplayName(post.userId);
 
@@ -108,7 +112,7 @@ const Home = () => {
               {/* Post Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-100">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-                  {displayName[0].toUpperCase()}
+                  {displayName[0]?.toUpperCase()}
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">{displayName}</p>
@@ -125,6 +129,7 @@ const Home = () => {
               {/* Post Content */}
               <div className="p-4 space-y-3">
                 {post.text && <p className="text-gray-800">{post.text}</p>}
+
                 {post.image && (
                   <div className="rounded-lg overflow-hidden bg-gray-100">
                     <img
@@ -149,16 +154,17 @@ const Home = () => {
                   <span>{post.likes?.includes(currentUserId) ? "❤️" : "🤍"}</span>
                   <span>{post.likes?.length || 0}</span>
                 </button>
+
                 <span className="text-gray-400 text-sm">
                   {post.likes?.length === 1 ? "like" : "likes"}
                 </span>
               </div>
 
-              {/* Comments - Added postOwnerId prop */}
+              {/* Comments */}
               <div className="border-t border-gray-100">
-                <Comments 
-                  postId={post._id} 
-                  token={token} 
+                <Comments
+                  postId={post._id}
+                  token={token}
                   currentUserId={currentUserId}
                   postOwnerId={post.userId?._id || post.userId}
                 />
@@ -168,7 +174,7 @@ const Home = () => {
         })}
       </main>
 
-      {/* Bottom Menu */}
+      {/* Bottom Navigation */}
       <div className="sticky bottom-0 z-10">
         <BottomMenu />
       </div>

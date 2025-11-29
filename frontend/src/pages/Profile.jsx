@@ -10,6 +10,7 @@ const Profile = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const { id } = useParams();
@@ -36,16 +37,16 @@ const Profile = () => {
       try {
         setLoading(true);
 
-        // Fetch user data
+        // Fetch user details
         const userRes = await axios.get(
-          `http://localhost:5000/api/users/${profileId}`,
+          `${API_URL}/api/users/${profileId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUser(userRes.data);
 
-        // Fetch user's posts
+        // Fetch posts by user
         const postRes = await axios.get(
-          `http://localhost:5000/api/posts/user/${profileId}`,
+          `${API_URL}/api/posts/user/${profileId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setPosts(Array.isArray(postRes.data) ? postRes.data : []);
@@ -57,19 +58,23 @@ const Profile = () => {
     };
 
     if (profileId) fetchData();
-  }, [profileId, token, navigate]);
+  }, [profileId, token, navigate, API_URL]);
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
 
+  // Delete account
   const handleDeleteAccount = async () => {
     if (!window.confirm("Are you sure you want to delete your account?")) return;
+
     try {
-      await axios.delete(`http://localhost:5000/api/users/${currentUserId}`, {
+      await axios.delete(`${API_URL}/api/users/${currentUserId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       localStorage.removeItem("token");
       navigate("/");
     } catch (err) {
@@ -78,12 +83,15 @@ const Profile = () => {
     }
   };
 
+  // Delete post
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
+
     try {
-      await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
+      await axios.delete(`${API_URL}/api/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setPosts(posts.filter((p) => p._id !== postId));
     } catch (err) {
       console.error("Error deleting post:", err);
@@ -91,13 +99,15 @@ const Profile = () => {
     }
   };
 
+  // Like Post
   const handleLike = async (postId) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/posts/${postId}/like`,
+        `${API_URL}/api/posts/${postId}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setPosts((prev) =>
         prev.map((post) =>
           post._id === postId ? { ...post, likes: res.data.likes } : post
@@ -108,17 +118,14 @@ const Profile = () => {
     }
   };
 
-  // Helper function to get post owner ID
+  // Extract the post owner ID safely
   const getPostOwnerId = (post) => {
     if (!post.userId) return null;
-    // If userId is an object (populated)
-    if (typeof post.userId === 'object' && post.userId._id) {
-      return post.userId._id;
-    }
-    // If userId is just a string ID
+    if (typeof post.userId === "object" && post.userId._id) return post.userId._id;
     return post.userId.toString();
   };
 
+  // ==================== LOADING UI ====================
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
@@ -131,6 +138,7 @@ const Profile = () => {
     );
   }
 
+  // ==================== USER NOT FOUND ====================
   if (!user) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
@@ -143,6 +151,7 @@ const Profile = () => {
     );
   }
 
+  // ==================== PROFILE PAGE ====================
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
       <div className="sticky top-0 z-40">
@@ -150,6 +159,7 @@ const Profile = () => {
       </div>
 
       <div className="flex-1 w-full max-w-3xl mx-auto p-4 pb-24 flex flex-col gap-6">
+        
         {/* Profile Header */}
         <div className="flex flex-col items-center bg-white p-6 rounded-xl shadow-md text-center">
           <div className="w-24 h-24 mb-3 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -160,14 +170,16 @@ const Profile = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span role="img" aria-label="profile" className="text-3xl">
-                🐱
-              </span>
+              <span className="text-3xl">🐱</span>
             )}
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900">{user.name || "Anonymous"}</h2>
-          <p className="text-gray-500 text-sm mt-1">{user.email || "No email available"}</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {user.name || "Anonymous"}
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            {user.email || "No email available"}
+          </p>
           {user.bio && <p className="text-gray-600 mt-2">{user.bio}</p>}
 
           <div className="flex gap-4 mt-3 text-gray-700">
@@ -176,6 +188,7 @@ const Profile = () => {
             <span>{user.following?.length || 0} following</span>
           </div>
 
+          {/* Buttons for own profile */}
           {profileId === currentUserId && (
             <div className="flex gap-3 mt-4 flex-wrap justify-center">
               <button
@@ -184,12 +197,14 @@ const Profile = () => {
               >
                 Edit Profile
               </button>
+
               <button
                 className="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full shadow hover:bg-gray-300 transition"
                 onClick={handleLogout}
               >
                 Logout
               </button>
+
               <button
                 className="px-6 py-2 bg-red-500 text-white font-semibold rounded-full shadow hover:bg-red-600 transition"
                 onClick={handleDeleteAccount}
@@ -200,7 +215,7 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Posts */}
+        {/* User Posts */}
         <div className="flex flex-col gap-4">
           {posts.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No posts yet.</p>
@@ -210,11 +225,14 @@ const Profile = () => {
               const isOwnPost = postOwnerId === currentUserId;
 
               return (
-                <div key={post._id} className="bg-white rounded-xl shadow p-4 flex flex-col gap-3">
+                <div
+                  key={post._id}
+                  className="bg-white rounded-xl shadow p-4 flex flex-col gap-3"
+                >
                   <div className="flex justify-between items-center text-gray-800">
                     <div>
-                      <strong>{user.name || "Anonymous"}</strong>
-                      <p className="text-gray-500 text-sm">{user.email || "No email available"}</p>
+                      <strong>{user.name}</strong>
+                      <p className="text-gray-500 text-sm">{user.email}</p>
                     </div>
                     <span className="text-sm text-gray-500">
                       {new Date(post.createdAt).toLocaleDateString()}
@@ -222,6 +240,7 @@ const Profile = () => {
                   </div>
 
                   {post.text && <p className="text-gray-700">{post.text}</p>}
+
                   {post.image && (
                     <img
                       src={post.image}
@@ -230,29 +249,35 @@ const Profile = () => {
                     />
                   )}
 
-                  {/* Likes Section */}
+                  {/* Likes */}
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
                     <button
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
                         post.likes?.includes(currentUserId)
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                       onClick={() => handleLike(post._id)}
                     >
-                      <span>{post.likes?.includes(currentUserId) ? "❤️" : "🤍"}</span>
+                      <span>
+                        {post.likes?.includes(currentUserId) ? "❤️" : "🤍"}
+                      </span>
                       <span>{post.likes?.length || 0}</span>
                     </button>
+
                     <span className="text-gray-500 text-sm">
                       {post.likes?.length === 1 ? "like" : "likes"}
                     </span>
+
                     <span className="text-gray-400 text-sm">•</span>
+
                     <span className="text-gray-500 text-sm">
-                      {post.comments?.length || 0} {post.comments?.length === 1 ? "comment" : "comments"}
+                      {post.comments?.length || 0}{" "}
+                      {post.comments?.length === 1 ? "comment" : "comments"}
                     </span>
                   </div>
 
-                  {/* Delete Post Button - Only show for own posts */}
+                  {/* Delete Post */}
                   {isOwnPost && (
                     <button
                       className="px-3 py-1 bg-red-500 text-white rounded-full text-sm self-end hover:bg-red-600 transition"
@@ -262,7 +287,7 @@ const Profile = () => {
                     </button>
                   )}
 
-                  {/* Comments Component */}
+                  {/* Comments */}
                   <Comments
                     postId={post._id}
                     token={token}

@@ -5,13 +5,17 @@ import BottomMenu from "../components/BottomMenu";
 
 const Search = () => {
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
-  const currentUserId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
+  const currentUserId = token
+    ? JSON.parse(atob(token.split(".")[1])).id
+    : null;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -20,14 +24,20 @@ const Search = () => {
         setError("");
         return;
       }
+
       setLoading(true);
       setError("");
+
       try {
         const res = await fetch(
-          `http://localhost:5000/api/search?name=${encodeURIComponent(searchQuery)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${API_URL}/api/search?name=${encodeURIComponent(searchQuery)}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const data = await res.json();
         setUsers(data);
       } catch (err) {
@@ -41,14 +51,15 @@ const Search = () => {
 
     const timer = setTimeout(fetchUsers, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, token]);
+  }, [searchQuery, token, API_URL]);
 
   const handleFollowUser = async (userIdToFollow) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userIdToFollow}/follow`, {
+      const res = await fetch(`${API_URL}/api/users/${userIdToFollow}/follow`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         setUsers((prev) =>
           prev.map((u) =>
@@ -64,7 +75,7 @@ const Search = () => {
         );
       }
     } catch (err) {
-      console.error(err);
+      console.error("Follow error:", err);
     }
   };
 
@@ -77,7 +88,7 @@ const Search = () => {
 
       {/* Search Content */}
       <div className="flex-1 p-4 overflow-y-auto max-w-3xl mx-auto w-full">
-        {/* Search Input */}
+        {/* Back + Search Input */}
         <div className="flex items-center gap-3 mb-4">
           <button
             className="px-5 py-2 bg-pink-100 text-pink-600 font-semibold rounded-full hover:bg-pink-200 transition"
@@ -85,6 +96,7 @@ const Search = () => {
           >
             ← Back
           </button>
+
           <input
             type="text"
             placeholder="Search users..."
@@ -96,8 +108,13 @@ const Search = () => {
 
         {/* Search Results */}
         <div className="flex flex-col gap-3">
-          {loading && <p className="text-gray-500 text-center py-4">Searching...</p>}
-          {error && <p className="text-red-500 text-center py-4">{error}</p>}
+          {loading && (
+            <p className="text-gray-500 text-center py-4">Searching...</p>
+          )}
+
+          {error && (
+            <p className="text-red-500 text-center py-4">{error}</p>
+          )}
 
           {!loading && users.length > 0 ? (
             users.map((user) => (
@@ -107,8 +124,8 @@ const Search = () => {
                 onClick={() =>
                   navigate(
                     user._id === currentUserId
-                      ? "/profile" // go to own profile
-                      : `/profile/${user._id}` // go to other user's profile
+                      ? "/profile"
+                      : `/profile/${user._id}`
                   )
                 }
               >
@@ -117,8 +134,11 @@ const Search = () => {
                     {user.username || user.name}
                   </h3>
                   <p className="text-gray-600 text-sm">{user.email}</p>
-                  {user.bio && <p className="text-gray-600 text-sm">{user.bio}</p>}
+                  {user.bio && (
+                    <p className="text-gray-600 text-sm">{user.bio}</p>
+                  )}
                 </div>
+
                 {user._id !== currentUserId && (
                   <button
                     className={`px-5 py-2 rounded-full font-semibold transition-colors ${

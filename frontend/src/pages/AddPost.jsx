@@ -13,12 +13,13 @@ const AddPost = () => {
   const [newPostData, setNewPostData] = useState(null);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL; // ✅ backend URL (Render)
+
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         setError("Image size must be less than 2MB");
-        // Clear any previously selected image
         setSelectedImage(null);
         setImagePreview("");
         return;
@@ -77,7 +78,7 @@ const AddPost = () => {
         image: imageData,
       };
 
-      const response = await fetch("http://localhost:5000/api/posts", {
+      const response = await fetch(`${API_URL}/api/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,23 +96,20 @@ const AddPost = () => {
         setError("");
         document.getElementById("gallery-input").value = "";
       } else {
-        // Log the response details
-        console.error("Response status:", response.status);
-        console.error("Response statusText:", response.statusText);
-        
         const contentType = response.headers.get("content-type");
+
         if (contentType && contentType.includes("application/json")) {
           const errData = await response.json();
           setError(errData.message || "Failed to add post");
         } else {
           const textResponse = await response.text();
-          console.error("Non-JSON response:", textResponse.substring(0, 500));
-          setError(`Server error (${response.status}): Backend returned HTML instead of JSON. Check if the API endpoint exists.`);
+          console.error("HTML response:", textResponse.substring(0, 300));
+          setError(`Server error (${response.status}): Backend returned HTML.`);
         }
       }
     } catch (err) {
       console.error("Full error:", err);
-      setError(`Error creating post: ${err.message || err.toString()}`);
+      setError(`Error creating post: ${err.message}`);
     } finally {
       setUploading(false);
     }
@@ -119,12 +117,10 @@ const AddPost = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
-      {/* Navbar */}
       <div className="sticky top-0 z-40">
         <Navbar />
       </div>
 
-      {/* Content */}
       <div className="flex-1 w-full p-4 pb-32 flex flex-col overflow-y-auto max-w-3xl mx-auto">
         <h2 className="text-3xl font-bold mb-4 text-gray-900">Create a Post</h2>
 
@@ -134,17 +130,14 @@ const AddPost = () => {
           </div>
         )}
 
-  
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-          {/* Textarea */}
           <textarea
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none min-h-[100px] max-h-[200px] overflow-y-auto"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none min-h-[100px] max-h-[200px]"
             placeholder="What's on your mind?"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
 
-          {/* Gallery Upload */}
           <div>
             <input
               id="gallery-input"
@@ -162,14 +155,9 @@ const AddPost = () => {
             </label>
           </div>
 
-          {/* Preview */}
           {imagePreview && (
             <div className="relative mt-2 w-full border rounded-lg p-2 bg-white shadow-sm">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full rounded-lg"
-              />
+              <img src={imagePreview} alt="Preview" className="w-full rounded-lg" />
               <button
                 type="button"
                 onClick={removeImage}
@@ -180,9 +168,7 @@ const AddPost = () => {
             </div>
           )}
 
-          {/* Buttons */}
           <div className="flex gap-3 mt-3 bg-pink-200 border-4 border-purple-500 p-4">
-          
             <button
               type="submit"
               disabled={uploading || (!text.trim() && !selectedImage)}
@@ -202,7 +188,6 @@ const AddPost = () => {
           </div>
         </form>
 
-        {/* Newly created post */}
         {newPostData && (
           <div className="mt-6 border rounded-lg p-4 bg-white shadow w-full">
             <p className="mb-2">{newPostData.text}</p>
@@ -218,7 +203,6 @@ const AddPost = () => {
         )}
       </div>
 
-      {/* Bottom Menu */}
       <div className="sticky bottom-0 z-40">
         <BottomMenu />
       </div>

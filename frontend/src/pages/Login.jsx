@@ -12,6 +12,7 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const API_URL = import.meta.env.VITE_API_URL;  // ✅ Always use backend URL
   const navigate = useNavigate();
 
   const formTitle = isLogin ? "Log In" : "Sign Up";
@@ -28,10 +29,10 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
     const endpoint = isLogin
-      ? `${baseURL}/api/auth/login`
-      : `${baseURL}/api/auth/register`;
+      ? `${API_URL}/api/auth/login`
+      : `${API_URL}/api/auth/register`;
 
     const dataToSend = isLogin
       ? { email: formData.email, password: formData.password }
@@ -62,8 +63,9 @@ const Login = ({ onLogin }) => {
         setError(data.message || `${formTitle} failed`);
       }
     } catch (err) {
-      setError("Connection error. Make sure backend is running.");
+      setError("Unable to connect. Check your internet or backend.");
     }
+
     setLoading(false);
   };
 
@@ -76,12 +78,11 @@ const Login = ({ onLogin }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* Left panel (desktop only) */}
+        
+        {/* Left phone preview (desktop only) */}
         <div className="hidden lg:flex justify-center">
           <div className="relative w-[380px] h-[580px] rounded-[40px] border-8 border-pink-500 bg-white shadow-2xl flex flex-col items-center pt-6">
-            {/* Heart at top */}
             <div className="text-pink-500 text-3xl mb-4 animate-pulse">❤️</div>
-            {/* Phone screen */}
             <div className="flex-1 w-[320px] bg-gray-50 rounded-3xl shadow-inner flex items-center justify-center">
               <span className="text-gray-300 font-semibold text-lg">
                 Heylo
@@ -90,26 +91,29 @@ const Login = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Right panel: Auth form */}
+        {/* Right side: Login / Signup */}
         <div className="w-full flex flex-col items-center">
           <div className="bg-white border border-gray-300 rounded-sm px-8 sm:px-10 pt-10 pb-6 w-full max-w-[380px]">
             <div className="text-center mb-6">
               <h1 className="text-4xl font-serif font-thin text-gray-800 tracking-wide">
                 Connectify
               </h1>
+
               {!isLogin && (
                 <p className="text-gray-500 font-medium text-sm mt-3">
-                  Create an account here to start using our Connectify!
+                  Create an account to start using Connectify!
                 </p>
               )}
             </div>
 
+            {/* Error Message */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-2 rounded text-center mb-4">
                 {error}
               </div>
             )}
 
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-2">
               {!isLogin && (
                 <>
@@ -119,29 +123,32 @@ const Login = ({ onLogin }) => {
                     placeholder="Full Name"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    required
+                    required={!isLogin}
                     className="w-full px-3 py-2 text-xs border border-gray-300 rounded bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400"
                   />
+
                   <input
                     type="text"
                     name="username"
                     placeholder="Username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    required
+                    required={!isLogin}
                     className="w-full px-3 py-2 text-xs border border-gray-300 rounded bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400"
                   />
                 </>
               )}
+
               <input
                 type="text"
                 name="email"
-                placeholder="Phone number, username, or email"
+                placeholder="Email address"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 text-xs border border-gray-300 rounded bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400"
               />
+
               <input
                 type="password"
                 name="password"
@@ -152,14 +159,14 @@ const Login = ({ onLogin }) => {
                 className="w-full px-3 py-2 text-xs border border-gray-300 rounded bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400"
               />
 
+              {/* Signup Policy */}
               {!isLogin && (
                 <p className="text-center text-[11px] text-gray-500 mt-4 px-2 leading-5">
-                  People who use our service may have uploaded your contact information to Connectify.{" "}
+                  By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
+                  <br />
                   <Link to="/policies" className="text-blue-500 underline hover:text-blue-700">
                     Learn More
-                  </Link>.
-                  <br />
-                  By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
+                  </Link>
                 </p>
               )}
 
@@ -181,6 +188,7 @@ const Login = ({ onLogin }) => {
               </button>
             </form>
 
+            {/* Forgot Password */}
             {isLogin && (
               <div className="text-center mt-4">
                 <button
@@ -192,6 +200,7 @@ const Login = ({ onLogin }) => {
               </div>
             )}
 
+            {/* OR Divider */}
             <div className="flex items-center text-gray-400 text-xs my-4">
               <div className="flex-1 border-t border-gray-300" />
               <span className="px-3 font-semibold text-gray-500">OR</span>
@@ -199,6 +208,7 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
 
+          {/* Switch Mode */}
           <div className="bg-white border border-gray-300 rounded-sm p-4 text-center text-sm w-full max-w-[380px] mt-2">
             <span>{switchMessage} </span>
             <button

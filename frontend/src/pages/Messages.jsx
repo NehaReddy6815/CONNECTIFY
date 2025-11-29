@@ -5,7 +5,13 @@ import io from "socket.io-client";
 import Navbar from "../components/Navbar";
 import BottomMenu from "../components/BottomMenu";
 
-const socket = io("http://localhost:5000");
+const API_URL = import.meta.env.VITE_API_URL;
+
+// ✅ Correct socket connection for production
+const socket = io(API_URL, {
+  transports: ["websocket"], 
+  withCredentials: true
+});
 
 const Messages = () => {
   const [followedUsers, setFollowedUsers] = useState([]);
@@ -20,7 +26,7 @@ const Messages = () => {
   const token = localStorage.getItem("token");
   const messagesEndRef = useRef(null);
 
-  // Initial load (users + socket setup)
+  // ==================== Initial Load ====================
   useEffect(() => {
     if (!token) {
       setError("Please login to access messages");
@@ -30,6 +36,8 @@ const Messages = () => {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       setCurrentUserId(payload.id);
+
+      // join personal room
       socket.emit("joinRoom", payload.id);
     } catch {
       setError("Invalid token");
@@ -37,17 +45,20 @@ const Messages = () => {
 
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/messages/users", {
+        const res = await axios.get(`${API_URL}/api/messages/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setFollowedUsers(res.data.followed || []);
         setNotFollowedUsers(res.data.notFollowed || []);
       } catch {
         setError("Failed to load users");
       }
     };
+
     fetchUsers();
 
+    // ==================== Socket Listeners ====================
     const handleReceiveMessage = (data) => {
       if (activeChatUser && data.senderId === activeChatUser._id) {
         setMessages((prev) => [...prev, data]);
@@ -67,12 +78,12 @@ const Messages = () => {
     };
   }, [token, activeChatUser]);
 
-  // Auto-scroll on new messages
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Select user
+  // ==================== Select user ====================
   const handleSelectUser = async (user) => {
     setActiveChatUser(user);
     setMessages([]);
@@ -80,16 +91,17 @@ const Messages = () => {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/messages/${currentUserId}/${user._id}`,
+        `${API_URL}/api/messages/${currentUserId}/${user._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setMessages(res.data || []);
     } catch {
       setError("Failed to load chat messages");
     }
   };
 
-  // Send message
+  // ==================== Send message ====================
   const handleSendMessage = () => {
     if (!newMessage.trim() || !activeChatUser || !currentUserId) return;
 
@@ -116,10 +128,10 @@ const Messages = () => {
     }
   };
 
-  // Delete message
+  // ==================== Delete Message ====================
   const handleDeleteMessage = async (messageId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/messages/${messageId}`, {
+      await axios.delete(`${API_URL}/api/messages/${messageId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -135,7 +147,7 @@ const Messages = () => {
     }
   };
 
-  // Time formatting
+  // ==================== Format Time ====================
   const formatTime = (date) => {
     try {
       return new Date(date).toLocaleTimeString([], {
@@ -147,21 +159,22 @@ const Messages = () => {
     }
   };
 
+  // ==================== UI ====================
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
       <Navbar />
 
-      {/* MAIN LAYOUT - leaves space for fixed Navbar & BottomMenu */}
+      {/* Main Layout */}
       <div className="flex-1 flex flex-col lg:flex-row w-full max-w-7xl mx-auto gap-2 lg:gap-4 p-2 lg:p-4
                       pt-16 pb-20 lg:pt-[72px] lg:pb-[72px] overflow-hidden">
         
-        {/* Inbox Sidebar (Desktop) */}
+        {/* Sidebar */}
         <div className="hidden lg:flex lg:w-1/3 xl:w-1/4 bg-white rounded-xl shadow p-4 flex-col gap-2 overflow-y-auto">
           <h2 className="text-xl font-bold mb-2 text-gray-800">Inbox</h2>
           {error && <div className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</div>}
-          
+
           {followedUsers.length > 0 && (
-            <div className="mb-2">
+            <>
               <h3 className="font-semibold text-gray-600 mb-2 text-sm">Following</h3>
               {followedUsers.map((u) => (
                 <button
@@ -171,21 +184,21 @@ const Messages = () => {
                     activeChatUser?._id === u._id ? "bg-pink-50 border border-pink-200" : ""
                   }`}
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-sm text-white font-semibold">
-                    {u.name?.[0]?.toUpperCase() || "U"}
+                  <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    {u.name?.[0]?.toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-800 truncate">{u.name}</div>
-                    <div className="text-xs text-gray-500 truncate">@{u.username}</div>
+                    <p className="font-medium text-gray-800 truncate">{u.name}</p>
+                    <p className="text-xs text-gray-500 truncate">@{u.username}</p>
                   </div>
                 </button>
               ))}
-            </div>
+            </>
           )}
 
           {notFollowedUsers.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-gray-600 mb-2 text-sm">Other Users</h3>
+            <>
+              <h3 className="font-semibold text-gray-600 mt-4 mb-2 text-sm">Other Users</h3>
               {notFollowedUsers.map((u) => (
                 <button
                   key={u._id}
@@ -194,53 +207,49 @@ const Messages = () => {
                     activeChatUser?._id === u._id ? "bg-pink-50 border border-pink-200" : ""
                   }`}
                 >
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm text-gray-600 font-semibold">
-                    {u.name?.[0]?.toUpperCase() || "U"}
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-semibold">
+                    {u.name?.[0]?.toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-800 truncate">{u.name}</div>
-                    <div className="text-xs text-gray-500 truncate">@{u.username}</div>
+                    <p className="font-medium text-gray-800 truncate">{u.name}</p>
+                    <p className="text-xs text-gray-500 truncate">@{u.username}</p>
                   </div>
                 </button>
               ))}
-            </div>
-          )}
-
-          {followedUsers.length === 0 && notFollowedUsers.length === 0 && !error && (
-            <div className="text-center py-8 text-gray-400">
-              <div className="text-4xl mb-2">👥</div>
-              <p>No users available</p>
-            </div>
+            </>
           )}
         </div>
 
         {/* Chat Area */}
         {activeChatUser ? (
           <div className="flex-1 bg-white rounded-xl shadow flex flex-col overflow-hidden">
-            {/* Header */}
-            <div className="p-3 lg:p-4 border-b border-gray-200 flex items-center gap-3 bg-gradient-to-r from-pink-50 to-purple-50 flex-shrink-0">
+            {/* Chat Header */}
+            <div className="p-4 border-b border-gray-200 flex items-center gap-3 bg-gradient-to-r from-pink-50 to-purple-50 flex-shrink-0">
               <button
                 onClick={() => setActiveChatUser(null)}
                 className="lg:hidden p-2 hover:bg-white rounded-full transition"
               >
                 ←
               </button>
+
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                {activeChatUser.name?.[0]?.toUpperCase() || "U"}
+                {activeChatUser.name?.[0]?.toUpperCase()}
               </div>
+
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-gray-800 text-base lg:text-lg truncate">{activeChatUser.name}</div>
-                <div className="text-xs lg:text-sm text-gray-500 truncate">@{activeChatUser.username}</div>
+                <p className="font-bold text-gray-800 truncate text-sm lg:text-lg">
+                  {activeChatUser.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">@{activeChatUser.username}</p>
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Message List */}
             <div className="flex-1 p-3 lg:p-4 overflow-y-auto flex flex-col gap-2 lg:gap-3">
               {messages.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-                  <div className="text-5xl lg:text-6xl mb-4">💬</div>
-                  <p className="text-base lg:text-lg">No messages yet</p>
-                  <p className="text-xs lg:text-sm">Start the conversation!</p>
+                <div className="flex flex-col items-center justify-center text-gray-400 flex-1">
+                  <div className="text-6xl mb-4">💬</div>
+                  <p>No messages yet</p>
                 </div>
               ) : (
                 messages.map((msg, idx) => (
@@ -252,22 +261,20 @@ const Messages = () => {
                   >
                     <div className="relative group">
                       <div
-                        className={`max-w-[80%] lg:max-w-[75%] px-3 py-2 lg:px-4 lg:py-3 rounded-2xl break-words shadow-sm ${
+                        className={`max-w-[80%] px-4 py-2 rounded-2xl break-words shadow ${
                           msg.senderId === currentUserId
                             ? "bg-pink-500 text-white rounded-br-none"
                             : "bg-gray-100 text-gray-800 rounded-bl-none"
                         }`}
                       >
-                        <div className="leading-relaxed text-sm lg:text-base">{msg.text}</div>
-                        <div className={`text-xs mt-1 ${msg.senderId === currentUserId ? "text-pink-100" : "text-gray-400"}`}>
-                          {formatTime(msg.createdAt)}
-                        </div>
+                        <p>{msg.text}</p>
+                        <small className="block mt-1 opacity-70">{formatTime(msg.createdAt)}</small>
                       </div>
 
                       {msg.senderId === currentUserId && hoveredMessageId === msg._id && (
                         <button
                           onClick={() => handleDeleteMessage(msg._id)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition shadow-lg z-10"
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow"
                         >
                           🗑
                         </button>
@@ -279,33 +286,32 @@ const Messages = () => {
               <div ref={messagesEndRef}></div>
             </div>
 
-            {/* Input */}
-            <div className="p-3 lg:p-4 border-t border-gray-200 bg-white flex-shrink-0">
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="flex-1 px-3 py-2 lg:px-4 lg:py-3 text-sm lg:text-base border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  className="px-4 py-2 lg:px-6 lg:py-3 text-sm lg:text-base bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full hover:from-pink-600 hover:to-pink-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md"
-                >
-                  Send
-                </button>
-              </div>
+            {/* Input Box */}
+            <div className="p-3 border-t flex items-center gap-2 bg-white">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-pink-400"
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!newMessage.trim()}
+                className="px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full shadow hover:opacity-80"
+              >
+                Send
+              </button>
             </div>
           </div>
         ) : (
           <div className="flex-1 bg-white rounded-xl shadow flex items-center justify-center">
             <div className="text-center p-4">
-              <div className="text-5xl lg:text-7xl mb-4">💬</div>
-              <p className="text-lg lg:text-xl text-gray-600 font-medium">Select a user to start chatting</p>
-              <p className="text-xs lg:text-sm text-gray-400 mt-2">Choose from your contacts</p>
+              <div className="text-5xl mb-4">💬</div>
+              <p className="text-lg text-gray-600 font-medium">
+                Select a user to start chatting
+              </p>
             </div>
           </div>
         )}
