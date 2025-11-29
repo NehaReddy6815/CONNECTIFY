@@ -1,35 +1,64 @@
 # Connectify
 
-
-**Connectify** is a MERN-stack social networking platform that allows users to interact in real-time, share content, and communicate seamlessly.  
-
----
-
-## Features
-
-- **Real-Time Messaging:** Implemented using **WebSocket.io** for instant messaging.  
-- **User Authentication:** Secure login and signup system.  
-- **Dynamic Profiles:** Users can create and customize profile pages.  
-- **Social Interaction:** Post updates, like and comment on posts, and search for other users.  
-- **Responsive Design:** Works across desktop and mobile devices.  
-- **Scalable Architecture:** Built to handle growth and smooth real-time updates.  
+A full-stack MERN social networking platform with real-time chat, posts, likes, comments, search, and user profiles.
 
 ---
 
-## Tech Stack
-
-- **Frontend:** React.js  
-- **Backend:** Node.js, Express.js  
-- **Database:** MongoDB  
-- **Real-Time Communication:** WebSocket.io  
-- **Others:** REST APIs, JWT Authentication  
+## 🚀 Live Demo
+**Frontend:** https://connectify-socialmediaapp.netlify.app  
+**Backend API:** https://connectify-nb7d.onrender.com  
+*(Note: Render free tier may take 20–40s to wake up.)*
 
 ---
 
-## Installation
+## ✨ Features
+- 🔐 JWT Authentication  
+- 👤 User Profiles  
+- 📝 Create posts with text & images  
+- ❤️ Like & Comment system  
+- 💬 Real-Time Chat via Socket.IO  
+- 🔍 Search users + Follow/Unfollow  
+- 📱 Fully responsive UI  
+- ⚡ Optimized MERN architecture  
 
-1. Clone the repository:
+---
 
-   ```bash
-   git clone https://github.com/NehaReddy6815/Connectify.git
-   cd Connectify
+## 🧰 Tech Stack
+
+### **Frontend**
+- React.js  
+- Vite  
+- Tailwind CSS  
+
+### **Backend**
+- Node.js  
+- Express.js  
+- MongoDB (Mongoose)  
+- Socket.IO  
+- JWT Authentication  
+
+### **Deployment**
+- Frontend → **Netlify**  
+- Backend → **Render**  
+- Database → **MongoDB Atlas**
+
+---
+
+## 🛠 Installation
+
+### 1. Clone repo
+```bash
+git clone https://github.com/NehaReddy6815/Connectify.git
+cd Connectify
+Install dependencies
+
+Backend
+
+cd backend
+npm install
+
+
+Frontend
+
+cd ../frontend
+npm install
