@@ -16,7 +16,7 @@ app.use(express.static("public"));
 // Enable CORS for frontend
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
+    origin: ["http://localhost:5173","https://connectify-socialmediaapp.netlify.app"], 
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
